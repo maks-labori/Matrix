@@ -1,96 +1,93 @@
 #pragma once
 #include "vector.h"
 
-template <typename vector_type>
-class MathVector : public Vector<vector_type> {
+template <typename T>
+class MathVector : public Vector<T> {
 private:
 	size_t _start_index;
 public:
-	MathVector(size_t s = 0,vector_type* data = nullptr);
-
-	MathVector(std::initializer_list<vector_type> );
-	MathVector(const MathVector<vector_type>&);
+	MathVector(size_t s = 0,const T* data = nullptr);
+	MathVector(std::initializer_list<T> data );
+	MathVector(const MathVector<T>& other);
 	~MathVector() = default;
 	inline size_t size()const noexcept {
-		return this->size();
+		return this->Vector<T>::getSize();
 	}
 
-	MathVector<vector_type> operator* (double value)const noexcept;
-	MathVector<vector_type>& operator*=(double value)noexcept;
+	MathVector<T> operator* (double value)const noexcept;
+	MathVector<T>& operator*=(double value)noexcept;
 
-	MathVector<vector_type> operator+ (const MathVector<vector_type>& other);
-	MathVector<vector_type> operator- (const MathVector<vector_type>& other);
-	double operator* (const MathVector<vector_type>& other);
+	MathVector<T> operator+ (const MathVector<T>& other);
+	MathVector<T> operator- (const MathVector<T>& other);
+	double operator* (const MathVector<T>& other);
 
-	MathVector<vector_type>& operator+=(const MathVector<vector_type>& other);
-	MathVector<vector_type>& operator-=(const MathVector<vector_type>& other);
-	MathVector<vector_type>& operator=(const MathVector<vector_type>& other);
+	MathVector<T>& operator+=(const MathVector<T>& other);
+	MathVector<T>& operator-=(const MathVector<T>& other);
+	MathVector<T>& operator=(const MathVector<T>& other);
 
-	const vector_type& operator[](size_t index)const;
-	vector_type& operator[](size_t index);
+	const T& operator[](size_t index)const;
+	T& operator[](size_t index);
 
-	bool operator==(MathVector<vector_type>& other);
-	bool operator!=(MathVector<vector_type>& other);
+	bool operator==(MathVector<T>& other)const;
+	bool operator!=(MathVector<T>& other)const;
 
-	friend std::istream& operator>> (std::istream& in, MathVector<vector_type>& vec);
-	friend std::ostream& operator<< (std::ostream& out, const MathVector<vector_type>& vec);
+	//template <class friend_type>
+	//friend std::istream& operator>> (std::istream& in, MathVector<friend_type>& vec);
+
+	//template <class friend_type>
+	//friend std::ostream& operator<< (std::ostream& out, const MathVector<friend_type>& vec);
 };
 
-template <typename vector_type>
-MathVector<vector_type>::MathVector(size_t s, vector_type* data) {
-	Vector<vector_type>(data, s);
-	_start_index(0);
-	Vector<vector_type>::shrink_to_fit();
+template <typename T>
+MathVector<T>::MathVector(size_t s, const T* data): Vector<T>(data, s), _start_index(0) {
+	this->reserve(s);
 }
 
-template <typename vector_type>
-MathVector<vector_type>::MathVector(std::initializer_list<vector_type> data) {
-	Vector<vector_type>(data);
-	_start_index(0)
-	Vector<vector_type>::shrink_to_fit();
+template <typename T>
+MathVector<T>::MathVector(std::initializer_list<T> data): Vector<T>(data), _start_index(0){
+	this->reserve(data.size());
 }
 
-template <typename vector_type>
-MathVector<vector_type>::MathVector(const MathVector<vector_type>& other)  {
-	Vector<vector_type>(other);
-	_start_index(0);
-	Vector<vector_type>::shrink_to_fit();
+template <typename T>
+MathVector<T>::MathVector(const MathVector<T>& other): Vector<T>(other), _start_index(0) {
+	this->reserve(other.size());
 }
 
-template <typename vector_type>
-MathVector<vector_type> MathVector<vector_type>::operator*(double value)const noexcept{
-	MathVector<vector_type> res(*this);
+template <typename T>
+MathVector<T> MathVector<T>::operator*(double value)const noexcept{
+	MathVector<T> res(*this);
+	res *= value;
+	return res;
+}
+
+template <typename T>
+MathVector<T>& MathVector<T>::operator*=(double value)noexcept{
 	for (int i = 0;i < this->size();++i) {
-		res[i] *= value;
+		(*this)[i] *= value;
+	}
+	return (*this);
+}
+
+template <typename T>
+MathVector<T> MathVector<T>::operator+(const MathVector<T>& other){
+	MathVector<T> res(*this);
+	for (int i = 0;i < this->size();++i) {
+		res[i] = (*this)[i] + other[i];
 	}
 	return res;
 }
 
-template <typename vector_type>
-MathVector<vector_type>& MathVector<vector_type>::operator*=(double value)noexcept{
-	return (*this) * value;
-}
-
-template <typename vector_type>
-MathVector<vector_type> MathVector<vector_type>::operator+(const MathVector<vector_type>& other){
-	MathVector<vector_type> res(*this);
+template <typename T>
+MathVector<T> MathVector<T>::operator-(const MathVector<T>& other){
+	MathVector<T> res(*this);
 	for (int i = 0;i < this->size();++i) {
-		res[i] = this[i] + other[i];
+		res[i] = (*this)[i] - other[i];
 	}
 	return res;
 }
 
-template <typename vector_type>
-MathVector<vector_type> MathVector<vector_type>::operator-(const MathVector<vector_type>& other){
-	MathVector<vector_type> res(*this);
-	for (int i = 0;i < this->size();++i) {
-		res[i] = this[i] - other[i];
-	}
-	return res;
-}
-
-template <typename vector_type>
-double MathVector<vector_type>::operator* (const MathVector<vector_type>& other) {
+template <typename T>
+double MathVector<T>::operator* (const MathVector<T>& other) {
 	double res = 0.0;
 	for (int i = 0;i < this->size();++i) {
 		res += (*this)[i] * other[i];
@@ -98,67 +95,67 @@ double MathVector<vector_type>::operator* (const MathVector<vector_type>& other)
 	return res;
 }
 
-template <typename vector_type>
-MathVector<vector_type>& MathVector<vector_type>::operator+=(const MathVector<vector_type>& other) {
+template <typename T>
+MathVector<T>& MathVector<T>::operator+=(const MathVector<T>& other) {
 	(*this) = (*this) + other;
 	return *this;
 }
 
-template <typename vector_type>
-MathVector<vector_type>& MathVector<vector_type>::operator-=(const MathVector<vector_type>& other){
+template <typename T>
+MathVector<T>& MathVector<T>::operator-=(const MathVector<T>& other){
 	(*this) = (*this) - other;
 	return *this;
 }
 
-template <typename vector_type>
-MathVector<vector_type>& MathVector<vector_type>::operator=(const MathVector<vector_type>& other){
+template <typename T>
+MathVector<T>& MathVector<T>::operator=(const MathVector<T>& other){
 	if (&other != this) {
-		(*this).Vector<vector_type>::operator=(other);
+		(*this).Vector<T>::operator=(other);
 		_start_index = other._start_index;
-		return (*this);
 	}
+	return (*this);
 }
 
-template <typename vector_type>
-const vector_type& MathVector<vector_type>::operator[](size_t index)const {
-	return (*this).Vector<vector_type>::operator[](index);
+template <typename T>
+const T& MathVector<T>::operator[](size_t index)const {
+	return (*this).Vector<T>::operator[](index);
 }
 
-template <typename vector_type>
-vector_type& MathVector<vector_type>::operator[](size_t index) {
-	return (*this).Vector<vector_type>::operator[](index);
+template <typename T>
+T& MathVector<T>::operator[](size_t index) {
+	return (*this).Vector<T>::operator[](index);
 }
 
-template <typename vector_type>
-bool MathVector<vector_type>::operator==(MathVector<vector_type>& other) {
-	return ((*this).Vector<vector_type>::operator==(other) && _start_index == other._start_index);
+template <typename T>
+bool MathVector<T>::operator==(MathVector<T>& other)const {
+	return ((*this).Vector<T>::operator==(other) && _start_index == other._start_index);
 }
 
-template <typename vector_type>
-bool MathVector<vector_type>::operator!=(MathVector<vector_type>& other) {
+template <typename T>
+bool MathVector<T>::operator!=(MathVector<T>& other)const {
 	return !((*this) == other);
 }
 
-template <typename vector_type>
-std::istream& operator>> (std::istream& in, MathVector<vector_type>& vec) {
-	vector_type element;
-	while (in >> element) {
-		(*this).push_back(element);
-	}
-	return in;
-}
-
-template <typename vector_type>
-std::ostream& operator<< (std::ostream& out, const MathVector<vector_type>& vec) {
-	out << "{";
-	if (this->isempty()) {
-		out << "}\n";
-		return out;
-	}
-	out << vec[0];
-	for (int i = 1;i < this->size();++i) {
-		out << "," << vec[i];
-	}
-	out << "}\n";
-	return out;
-}
+//template <typename T>
+//std::istream& operator>> (std::istream& in, MathVector<T>& vec) {
+//	T element;
+//	while (in >> element) {
+//		vec.pushBack(element);
+//	}
+//	return in;
+//}
+//
+//template <typename T>
+//std::ostream& operator<< (std::ostream& out, const MathVector<T>& vec) {
+//	out << "{";
+//	if (vec.isEmpty()) {
+//		out << "}\n";
+//		return out;
+//	}
+//	out << vec[0];
+//	for (int i = 1;i < vec.size();++i) {
+//		out << "," << vec[i];
+//	}
+//	out << "}\n";
+//	return out;
+//}
