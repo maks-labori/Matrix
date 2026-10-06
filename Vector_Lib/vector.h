@@ -137,23 +137,23 @@ private:
 	}
 };
 
-template<class Type>
-std::ostream& operator<< (const std::ostream& out, const Vector<Type>& vector) {
-	size_t size = vector.getSize();
-	for (size_t i = 0; i < size; i++) {
-		out << vector[i];
-	}
-	return out;
-}
-
-template<class Type>
-std::istream& operator>> (const std::istream& in, Vector<Type>& vector) {
-	Type element;
-	while (in >> element) {
-		vector.pushBack(element);
-	}
-	return in;
-}
+//template<class Type>
+//std::ostream& operator<< (const std::ostream& out, const Vector<Type>& vector) {
+//	size_t size = vector.getSize();
+//	for (size_t i = 0; i < size; i++) {
+//		out << vector[i];
+//	}
+//	return out;
+//}
+//
+//template<class Type>
+//std::istream& operator>> (const std::istream& in, Vector<Type>& vector) {
+//	Type element;
+//	while (in >> element) {
+//		vector.pushBack(element);
+//	}
+//	return in;
+//}
 
 template<class T>
 Vector<T>::Vector(size_t size, const T* array) :storage_(size, array), front_(0), back_(size) {}

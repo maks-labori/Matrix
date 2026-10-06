@@ -56,7 +56,7 @@ public:
 
 template <class T>
 int MemData<T>::calculateCapacity_(size_t capacity) {
-	return (capacity / MEM_STEP + 1) * MEM_STEP;
+	return ((capacity / MEM_STEP) + 1) * MEM_STEP;
 }
 
 template<class T>
@@ -118,7 +118,7 @@ const T& MemData<T>::at(size_t index) const{
 template<class T>
 void MemData<T>::reserve(size_t capacity)
 {
-	if (capacity <= capacity_) {
+	if (capacity <= capacity_ || capacity == 0) {
 		return;
 	}
 	capacity_ = capacity;

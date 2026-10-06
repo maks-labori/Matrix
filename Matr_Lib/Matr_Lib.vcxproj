@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{164c2fee-c52b-42db-a517-7a514094e247}</ProjectGuid>
-    <RootNamespace>vector</RootNamespace>
+    <ProjectGuid>{10af4c37-bf99-4441-9b97-8ce5bd8e128e}</ProjectGuid>
+    <RootNamespace>MatrLib</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -102,7 +102,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\maksi\OneDrive\Desktop\super_lab_university\Matr_Lib;C:\Users\maksi\OneDrive\Desktop\super_lab_university\MathVector_Lib;C:\Users\maksi\OneDrive\Desktop\super_lab_university\Vector_Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\maksi\OneDrive\Desktop\super_lab_university\MathVector_Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -124,18 +124,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="matrix.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="matrix.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\MathVector_Lib\MathVector_Lib.vcxproj">
       <Project>{c5d28ef8-ae75-4ea2-957c-471d9c76fbf8}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Matr_Lib\Matr_Lib.vcxproj">
-      <Project>{10af4c37-bf99-4441-9b97-8ce5bd8e128e}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Vector_Lib\Vector_Lib.vcxproj">
-      <Project>{cd6e2de5-2c90-417e-bd3d-7fcbfa7382ee}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
