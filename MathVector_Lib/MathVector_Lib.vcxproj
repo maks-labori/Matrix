@@ -127,9 +127,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="mathvector.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="mathvector.h" />
   </ItemGroup>
   <ItemGroup>

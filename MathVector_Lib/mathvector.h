@@ -11,25 +11,25 @@ public:
 	MathVector(const MathVector<T>& other);
 	~MathVector() = default;
 	inline size_t size()const noexcept {
-		return this->Vector<T>::getSize();
+		return this->Vector<T>::size();
 	}
 
 	MathVector<T> operator* (const double& value)const noexcept;
 	MathVector<T>& operator*=(const double& value)noexcept;
 
-	MathVector<T> operator+ (const MathVector<T>& other)const noexcept;
-	MathVector<T> operator- (const MathVector<T>& other)const noexcept;
-	double operator* (const MathVector<T>& other)const noexcept;
+	MathVector<T> operator+ (const MathVector<T>& other)const;
+	MathVector<T> operator- (const MathVector<T>& other)const;
+	double operator* (const MathVector<T>& other)const;
 
-	MathVector<T>& operator+=(const MathVector<T>& other)noexcept;
-	MathVector<T>& operator-=(const MathVector<T>& other)noexcept;
+	MathVector<T>& operator+=(const MathVector<T>& other);
+	MathVector<T>& operator-=(const MathVector<T>& other);
 	MathVector<T>& operator=(const MathVector<T>& other)noexcept;
 
 	const T& operator[](size_t index)const;
 	T& operator[](size_t index);
 
-	bool operator==(MathVector<T>& other)const noexcept;
-	bool operator!=(MathVector<T>& other)const noexcept;
+	bool operator==(const MathVector<T>& other)const noexcept;
+	bool operator!=(const MathVector<T>& other)const noexcept;
 
 	template <class friendT>
 	friend MathVector<T> operator*(const double& value, const MathVector<T>& other)noexcept;
@@ -44,17 +44,17 @@ MathVector<T> operator*(const double& value, const MathVector<T>& other)noexcept
 
 template <typename T>
 MathVector<T>::MathVector(size_t s, const T* data): Vector<T>(s,data), _start_index(0) {
-	this->Vector<T>::reserve(s);
+	this->Vector<T>::realloc(s);
 }
 
 template <typename T>
 MathVector<T>::MathVector(std::initializer_list<T> data): Vector<T>(data), _start_index(0){
-	this->Vector<T>::reserve(data.size());
+	this->Vector<T>::realloc(data.size());
 }
 
 template <typename T>
 MathVector<T>::MathVector(const MathVector<T>& other): Vector<T>(other), _start_index(0) {
-	this->Vector<T>::reserve(other.size());
+	this->Vector<T>::realloc(other.size());
 }
 
 template <typename T>
@@ -73,7 +73,8 @@ MathVector<T>& MathVector<T>::operator*=(const double& value)noexcept{
 }
 
 template <typename T>
-MathVector<T> MathVector<T>::operator+(const MathVector<T>& other)const noexcept{
+MathVector<T> MathVector<T>::operator+(const MathVector<T>& other)const{
+	if (this->size() != other.size()) { throw std::logic_error("different size"); }
 	MathVector<T> res(*this);
 	for (int i = 0;i < this->size();++i) {
 		res[i] = (*this)[i] + other[i];
@@ -82,7 +83,8 @@ MathVector<T> MathVector<T>::operator+(const MathVector<T>& other)const noexcept
 }
 
 template <typename T>
-MathVector<T> MathVector<T>::operator-(const MathVector<T>& other)const noexcept{
+MathVector<T> MathVector<T>::operator-(const MathVector<T>& other)const{
+	if (this->size() != other.size()) { throw std::logic_error("different size"); }
 	MathVector<T> res(*this);
 	for (int i = 0;i < this->size();++i) {
 		res[i] = (*this)[i] - other[i];
@@ -91,7 +93,7 @@ MathVector<T> MathVector<T>::operator-(const MathVector<T>& other)const noexcept
 }
 
 template <typename T>
-double MathVector<T>::operator* (const MathVector<T>& other)const noexcept {
+double MathVector<T>::operator* (const MathVector<T>& other)const{
 	if ((*this).size() != other.size()) { throw std::logic_error("different dimension"); }
 	double res = 0.0;
 	for (int i = 0;i < this->size();++i) {
@@ -101,13 +103,13 @@ double MathVector<T>::operator* (const MathVector<T>& other)const noexcept {
 }
 
 template <typename T>
-MathVector<T>& MathVector<T>::operator+=(const MathVector<T>& other)noexcept {
+MathVector<T>& MathVector<T>::operator+=(const MathVector<T>& other){
 	(*this) = (*this) + other;
 	return *this;
 }
 
 template <typename T>
-MathVector<T>& MathVector<T>::operator-=(const MathVector<T>& other)noexcept{
+MathVector<T>& MathVector<T>::operator-=(const MathVector<T>& other){
 	(*this) = (*this) - other;
 	return *this;
 }
@@ -132,11 +134,11 @@ T& MathVector<T>::operator[](size_t index) {
 }
 
 template <typename T>
-bool MathVector<T>::operator==(MathVector<T>& other)const noexcept{
+bool MathVector<T>::operator==(const MathVector<T>& other)const noexcept{
 	return ((*this).Vector<T>::operator==(other) && _start_index == other._start_index);
 }
 
 template <typename T>
-bool MathVector<T>::operator!=(MathVector<T>& other)const noexcept{
+bool MathVector<T>::operator!=(const MathVector<T>& other)const noexcept{
 	return !((*this) == other);
 }

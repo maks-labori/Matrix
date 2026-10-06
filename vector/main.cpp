@@ -2,14 +2,10 @@
 #include "mathvector.h"
 #include "matrix.h"
 int main() {
-	std::cout << "Start\n";
-	MathVector<double> vec1 = { 2,2,2 };
-	MathVector<double> vec2{ 1,2,3,4,5 };
-	std::cout << vec1.size() << " " << vec2.size();
-	double b = 5.0;
-	MathVector<double>vec3;
-	vec3 = b * vec2;
-	std::cout << vec3;
-	//Matrix<int> matrix(2,2);
+	std::initializer_list<std::initializer_list<int>> list = { {1,2,3},{4,5,6},{7,8,9} };
+	Matrix<int> matrix(list);
+	Matrix<int> mat(matrix);
+	Matrix<int> new_matr = mat * matrix;
+	std::cout << mat << "\n" << new_matr;
 	return 0;
 }

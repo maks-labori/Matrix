@@ -124,10 +124,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="mem_data.cpp" />
-    <ClCompile Include="vector.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="mem_data.h" />
     <ClInclude Include="vector.h" />
   </ItemGroup>

@@ -5,20 +5,31 @@ template <typename T>
 class Matrix :public MathVector<MathVector<T>> {
 public:
 	inline size_t getN()const noexcept {
-		return this->MathVector<MathVector<T>>::size();
+		return (*this).MathVector<MathVector<T>>::size();
 	}
 	inline size_t getM()const noexcept {
 		if (getN() == 0) { return 0; }
-		return this[0]->MathVector<T>::size();
+		return (*this)[0].MathVector<T>::size();
 	}
 	Matrix();
 	Matrix(size_t, size_t);
 	Matrix(std::initializer_list<std::initializer_list<T>>);
 	Matrix(const Matrix&);
 	Matrix(const MathVector<MathVector<T>>&);
-	Matrix operator*(const Matrix<T>&)const;
-	Matrix Transposition()const noexcept;
+	Matrix<T> operator*(const Matrix<T>&)const;
+	Matrix<T> Transposition()const noexcept;
+
+	bool operator==(const Matrix<T>& other)const noexcept;
+	bool operator!=(const Matrix<T>& other)const noexcept;
 };
+
+template <typename T>
+std::ostream& operator<< (std::ostream& out, Matrix<T>& matrix) {
+	for (size_t i = 0;i < matrix.getN();++i) {
+		out << matrix[i];
+	}
+	return out;
+}
 
 template <typename T>
 Matrix<T>::Matrix() :MathVector<MathVector<T>>() {}
@@ -72,4 +83,18 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T>& other)const{
 		}
 	}
 	return res;
+}
+
+template <typename T>
+bool Matrix<T>::operator==(const Matrix<T>& other)const noexcept {
+	if ((*this).getM() != other.getM() || (*this).getN() != other.getN()) { return false; }
+	for (size_t i = 0;i < other.getN();++i) {
+		if ((*this)[i] != other[i]) { return false; }
+	}
+	return true;
+}
+
+template <typename T>
+bool Matrix<T>::operator!=(const Matrix<T>& other)const noexcept {
+	return !((*this) == other);
 }

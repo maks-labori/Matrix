@@ -1,727 +1,655 @@
 #include "pch.h"
+#include "matrix.h"
 
-#define VECTOR_TESTS
-//#define MATH_VECTOR_TESTS
 
-#ifdef VECTOR_TESTS
-#include "vector.h"
+//#define MEMDATA_TEST
+//#define VECTOR_TEST
+//#define MATHVECTOR_TEST
+#define MATRIX_TEST
 
-TEST(ClassVector, can_create_with_default_constructor) {
-    Vector<double> V1;
-    EXPECT_EQ(V1.getSize(), 0);
-    EXPECT_EQ(V1.getCapacity(), 16);
+#ifdef MEMDATA_TEST
+
+TEST(MemDataTest, DefaultConstructor) {
+    MemData<int> m;
+    EXPECT_EQ(m.capacity(), MEM_STEP);
+    EXPECT_NE(m.data(), nullptr);
 }
 
-TEST(ClassVector, can_create_with_constructor_by_size) {
-    Vector<double> V1(10);
-    Vector<double> V2(0);
-    Vector<double> V3(1000);
-
-    EXPECT_EQ(V1.getSize(), 10);
-    EXPECT_EQ(V1.getCapacity(), 32);
-    EXPECT_EQ(V2.getSize(), 0);
-    EXPECT_EQ(V2.getCapacity(), 16);
-    EXPECT_EQ(V3.getSize(), 1000);
-    EXPECT_EQ(V3.getCapacity(), 1024);
+TEST(MemDataTest, ConstructorWithSize) {
+    MemData<int> m(10);
+    EXPECT_GE(m.capacity(), 10u);
+    EXPECT_NE(m.data(), nullptr);
 }
 
-TEST(ClassVector, can_create_with_constructor_by_initializer_list) {
-    Vector<double> V1({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 });
-    Vector<double> V2({});
-    double example1[16] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 };
-
-    EXPECT_EQ(V1.getSize(), 16);
-    EXPECT_EQ(V1.getCapacity(), 32);
-    EXPECT_EQ(V2.getSize(), 0);
-    EXPECT_EQ(V2.getCapacity(), 16);
-    for (size_t i = 0; i < V1.getSize(); i++) {
-        EXPECT_EQ(V1[i], example1[i]);
+TEST(MemDataTest, ConstructorWithData) {
+    int arr[] = { 1, 2, 3, 4, 5 };
+    MemData<int> m(5, arr);
+    EXPECT_GE(m.capacity(), 5u);
+    for (size_t i = 0; i < 5; ++i) {
+        EXPECT_EQ(m[i], arr[i]);
     }
 }
 
-TEST(ClassVector, can_create_with_init_constructor) {
-    double* list1 = new double[16];
-    for (int i = 0; i < 16; i++) {
-        list1[i] = i;
+TEST(MemDataTest, InitializerListConstructor) {
+    MemData<int> m{ 1, 2, 3, 4, 5 };
+    EXPECT_GE(m.capacity(), 5u);
+    EXPECT_EQ(m[0], 1);
+    EXPECT_EQ(m[4], 5);
+}
+
+TEST(MemDataTest, MoveConstructor) {
+    MemData<int> m1(10);
+    m1[0] = 42;
+    int* ptr = m1.data();
+
+    MemData<int> m2(std::move(m1));
+    EXPECT_EQ(m2.data(), ptr);
+    EXPECT_EQ(m2[0], 42);
+    EXPECT_EQ(m1.data(), nullptr);
+    EXPECT_EQ(m1.capacity(), 0u);
+}
+
+TEST(MemDataTest, MoveAssignment) {
+    MemData<int> m1(10);
+    m1[0] = 42;
+    MemData<int> m2;
+
+    m2 = std::move(m1);
+    EXPECT_EQ(m2[0], 42);
+    EXPECT_EQ(m1.data(), nullptr);
+}
+
+TEST(MemDataTest, OperatorIndex) {
+    MemData<int> m(5);
+    for (size_t i = 0; i < 5; ++i) {
+        m[i] = static_cast<int>(i * 10);
     }
-    Vector<double> V1(16, list1);
-
-    EXPECT_EQ(V1.getSize(), 16);
-    EXPECT_EQ(V1.getCapacity(), 32);
-    for (size_t i = 0; i < V1.getSize(); i++) {
-        EXPECT_EQ(V1[i], list1[i]);
-    }
-    delete[] list1;
-}
-
-TEST(ClassVector, can_create_with_copy_constructor) {
-    Vector<double> V1({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 });
-    Vector<double> V2(V1);
-    double example1[16] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 };
-
-    EXPECT_EQ(V1.getSize(), V2.getSize());
-    EXPECT_EQ(V1.getCapacity(), V2.getCapacity());
-    for (size_t i = 0; i < V1.getSize(); i++) {
-        EXPECT_EQ(V1[i], example1[i]);
-        EXPECT_EQ(V2[i], example1[i]);
-    }
-}
-
-TEST(ClassVector, can_create_with_move_constructor) {
-    Vector<double> V1({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 });
-    Vector<double> V3 = V1;
-    EXPECT_TRUE(V3 == V1);
-    Vector<double> V2(std::move(V1));
-    EXPECT_TRUE(V3 == V2);
-}
-
-TEST(ClassVector, can_isEmpty) {
-    Vector<double> V1;
-    Vector<double> V2(0);
-    Vector<double> V4({ 1,2,3 });
-    Vector<double> V5({ 1,2,3,0 });
-
-    EXPECT_TRUE(V1.isEmpty());
-    EXPECT_TRUE(V2.isEmpty());
-    EXPECT_FALSE(V4.isEmpty());
-    EXPECT_FALSE(V5.isEmpty());
-}
-
-TEST(ClassVector, can_get_front) {
-    Vector<double> V1({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 });
-    Vector<double> V2({ 1000,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 });
-    EXPECT_DOUBLE_EQ(V1[0], 1);
-    EXPECT_DOUBLE_EQ(V2[0], 1000);
-}
-
-TEST(ClassVector, can_get_back) {
-    Vector<double> V1({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 });
-    Vector<double> V2({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,19000 });
-    EXPECT_DOUBLE_EQ(V1[V1.getSize() - 1], 16);
-    EXPECT_DOUBLE_EQ(V2[V2.getSize() - 1], 19000);
-}
-
-TEST(ClassVector, throw_when_try_get_front_in_empty_vector) {
-    Vector<double> V1;
-    ASSERT_THROW(V1[0], std::logic_error);
-}
-
-TEST(ClassVector, throw_when_try_get_back_in_empty_vector) {
-    Vector<double> V1;
-    ASSERT_THROW(V1[V1.getSize()], std::logic_error);
-}
-
-TEST(ClassVector, can_output_with_operator_cout) {
-    Vector<double> vec({ 1, 2, 3, 4, 5, 6, 7, 8, 9 });
-    std::stringstream out;
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 4, 5, 6, 7, 8, 9 }", out.str());
-}
-
-TEST(ClassVector, can_input_with_operator_cin) {
-    Vector<double> vec;
-    std::stringstream in("9 1 2 3 4 5 6 7 8 9");
-    in >> vec;
-
-    EXPECT_EQ(9, vec.getSize());
-    EXPECT_EQ(32, vec.getCapacity());
-
-    for (size_t i = 0; i < vec.getSize(); i++) {
-        EXPECT_DOUBLE_EQ(vec[i], i + 1);
+    for (size_t i = 0; i < 5; ++i) {
+        EXPECT_EQ(m[i], static_cast<int>(i * 10));
     }
 }
 
-TEST(ClassVector, can_pushFront) {
-    Vector<double> vec({ 44, 5, 7, 8 });
-    std::stringstream out;
-    for (size_t i = 0; i < 4; i++) {
-        vec.pushFront(3.0 - i);
-    }
-    out << vec;
-    EXPECT_EQ("{ 0, 1, 2, 3, 44, 5, 7, 8 }", out.str());
-    EXPECT_EQ(8, vec.getSize());
-    EXPECT_EQ(32, vec.getCapacity());
+TEST(MemDataTest, allocateRawIncreasesCapacity) {
+    MemData<int> m(5);
+    size_t old_cap = m.capacity();
+    m.allocateRaw(100);
+    EXPECT_GE(m.capacity(), 100u);
 }
 
-TEST(ClassVector, can_pushFrontMany) {
-    Vector<double> vec({ 44, 5, 7, 8 });
-    std::stringstream out;
-    double list[4] = { 0,1,2,3 };
-    vec.pushFrontMany(list, 4);
-    out << vec;
-    EXPECT_EQ("{ 0, 1, 2, 3, 44, 5, 7, 8 }", out.str());
-    EXPECT_EQ(8, vec.getSize());
-    EXPECT_EQ(32, vec.getCapacity());
+TEST(MemDataTest, Clear) {
+    MemData<int> m(10);
+    m.clear();
+    EXPECT_EQ(m.capacity(), 0u);
+    EXPECT_EQ(m.data(), nullptr);
 }
 
-TEST(ClassVector, can_pushFront_in_empty_vector) {
-    Vector<double> vec;
-    std::stringstream out;
-    EXPECT_EQ(0, vec.getSize());
-    EXPECT_EQ(16, vec.getCapacity());
-    for (size_t i = 0; i < 4; i++) {
-        vec.pushFront(3.0 - i);
-    }
-    out << vec;
-    EXPECT_EQ("{ 0, 1, 2, 3 }", out.str());
-    EXPECT_EQ(4, vec.getSize());
-    EXPECT_EQ(32, vec.getCapacity());
+TEST(MemDataTest, CalculateCapacity) {
+    // Должно округлять вверх до кратного MEM_STEP
+    MemData<int> temp;
+    EXPECT_EQ(temp.calculateCapacity_(1), MEM_STEP);
+    EXPECT_EQ(temp.calculateCapacity_(MEM_STEP), MEM_STEP * 2);
+    EXPECT_EQ(temp.calculateCapacity_(MEM_STEP + 1), MEM_STEP * 2);
 }
 
-TEST(ClassVector, can_pushFrontMany_in_empty_vector) {
-    Vector<double> vec;
-    std::stringstream out;
-    double list[4] = { 0,1,2,3 };
-    vec.pushFrontMany(list, 4);
-    out << vec;
-    EXPECT_EQ("{ 0, 1, 2, 3 }", out.str());
-    EXPECT_EQ(4, vec.getSize());
-    EXPECT_EQ(32, vec.getCapacity());
+TEST(MemDataTest, ShiftRight) {
+    MemData<int> m(10);
+    for (size_t i = 0; i < 5; ++i) m[i] = static_cast<int>(i);
+
+    m.shiftRight(1, 3); // сдвигает элементы [1,2,3] вправо на 1
+
+    EXPECT_EQ(m[0], 0);
+    EXPECT_EQ(m[2], 1); // было m[1]
+    EXPECT_EQ(m[3], 2); // было m[2]
+    EXPECT_EQ(m[4], 3); // было m[3]
 }
 
-TEST(ClassVector, can_pushFront_with_reallocation) {
-    Vector<double> vec({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-    std::stringstream out;
-    EXPECT_EQ(14, vec.getSize());
-    EXPECT_EQ(32, vec.getCapacity());
-    for (size_t i = 0; i < 3; i++) {
-        vec.pushFront(3.0 - i);
-    }
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 }", out.str());
-    EXPECT_EQ(17, vec.getSize());
-    EXPECT_EQ(48, vec.getCapacity());
-}
-
-TEST(ClassVector, can_pushFrontMany_with_reallocation) {
-    Vector<double> vec({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-    std::stringstream out;
-    EXPECT_EQ(14, vec.getSize());
-    EXPECT_EQ(32, vec.getCapacity());
-    double list[3] = { 1,2,3 };
-    vec.pushFrontMany(list, 3);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 }", out.str());
-    EXPECT_EQ(17, vec.getSize());
-    EXPECT_EQ(48, vec.getCapacity());
-}
-
-TEST(ClassVector, can_pushBack) {
-    Vector<double> vec({ 44, 5, 7, 8 });
-    std::stringstream out;
-    for (size_t i = 0; i < 4; i++) {
-        vec.pushBack(3.0 - i);
-    }
-    out << vec;
-    EXPECT_EQ("{ 44, 5, 7, 8, 3, 2, 1, 0 }", out.str());
-    EXPECT_EQ(8, vec.getSize());
-    EXPECT_EQ(32, vec.getCapacity());
-}
-
-TEST(ClassVector, can_pushBackMany) {
-    Vector<double> vec({ 44, 5, 7, 8 });
-    std::stringstream out;
-    double list[4] = { 0,1,2,3 };
-    vec.pushBackMany(list, 4);
-    out << vec;
-    EXPECT_EQ("{ 44, 5, 7, 8, 0, 1, 2, 3 }", out.str());
-    EXPECT_EQ(8, vec.getSize());
-    EXPECT_EQ(32, vec.getCapacity());
-}
-
-TEST(ClassVector, can_pushBack_in_empty_vector) {
-    Vector<double> vec;
-    std::stringstream out;
-    for (size_t i = 0; i < 4; i++) {
-        vec.pushBack(3.0 - i);
-    }
-    out << vec;
-    EXPECT_EQ("{ 3, 2, 1, 0 }", out.str());
-    EXPECT_EQ(4, vec.getSize());
-    EXPECT_EQ(32, vec.getCapacity());
-}
-
-TEST(ClassVector, can_pushBackMany_in_empty_vector) {
-    Vector<double> vec;
-    std::stringstream out;
-    double list[4] = { 0,1,2,3 };
-    vec.pushBackMany(list, 4);
-    out << vec;
-    EXPECT_EQ("{ 0, 1, 2, 3 }", out.str());
-    EXPECT_EQ(4, vec.getSize());
-    EXPECT_EQ(32, vec.getCapacity());
-}
-
-TEST(ClassVector, can_pushBack_with_reallocation) {
-    Vector<double> vec({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-    std::stringstream out;
-    EXPECT_EQ(14, vec.getSize());
-    EXPECT_EQ(32, vec.getCapacity());
-    for (size_t i = 0; i < 3; i++) {
-        vec.pushBack(15.0 + i);
-    }
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 }", out.str());
-    EXPECT_EQ(17, vec.getSize());
-    EXPECT_EQ(48, vec.getCapacity());
-}
-
-
-TEST(ClassVector, can_pushBackMany_with_reallocation) {
-    Vector<double> vec({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-    std::stringstream out;
-    EXPECT_EQ(14, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-    double list[3] = { 3,2,1 };
-    vec.pushBackMany(list, 3);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 3, 2, 1 }", out.str());
-    EXPECT_EQ(17, vec.getSize());
-    EXPECT_EQ(30, vec.getCapacity());
-}
-
-TEST(ClassVector, can_insert) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    std::stringstream out;
-    vec.insert(99, 2);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 99, 3, 4, 5 }", out.str());
-    EXPECT_EQ(6, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_insertMany) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    std::stringstream out;
-    double list[3] = { 99, 100, 101 };
-    vec.insertMany(list, 3, 2);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 99, 100, 101, 3, 4, 5 }", out.str());
-    EXPECT_EQ(8, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_insert_with_reallocation) {
-    Vector<double> vec({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-    std::stringstream out;
-    EXPECT_EQ(14, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-    vec.insert(99, 7);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 4, 5, 6, 7, 99, 8, 9, 10, 11, 12, 13, 14 }", out.str());
-    EXPECT_EQ(15, vec.getSize());
-    EXPECT_EQ(30, vec.getCapacity());
-}
-
-TEST(ClassVector, can_insertMany_with_reallocation) {
-    Vector<double> vec({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 });
-    std::stringstream out;
-    EXPECT_EQ(14, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-    double list[3] = { 99, 100, 101 };
-    vec.insertMany(list, 3, 7);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 4, 5, 6, 7, 99, 100, 101, 8, 9, 10, 11, 12, 13, 14 }", out.str());
-    EXPECT_EQ(17, vec.getSize());
-    EXPECT_EQ(30, vec.getCapacity());
-}
-
-TEST(ClassVector, can_insert_to_front) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    std::stringstream out;
-    vec.insert(99, 0);
-    out << vec;
-    EXPECT_EQ("{ 99, 1, 2, 3, 4, 5 }", out.str());
-    EXPECT_EQ(6, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_insertMany_to_front) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    std::stringstream out;
-    double list[3] = { 99, 100, 101 };
-    vec.insertMany(list, 3, 0);
-    out << vec;
-    EXPECT_EQ("{ 99, 100, 101, 1, 2, 3, 4, 5 }", out.str());
-    EXPECT_EQ(8, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, throw_when_try_insert_with_wrong_position) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    EXPECT_THROW(vec.insert(99, 10), std::out_of_range);
-    EXPECT_THROW(vec.insertMany(nullptr, 3, 10), std::out_of_range);
-}
-
-TEST(ClassVector, can_popFront) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    std::stringstream out;
-    vec.popFront();
-    out << vec;
-    EXPECT_EQ("{ 2, 3, 4, 5 }", out.str());
-    EXPECT_EQ(4, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_popFrontMany) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    std::stringstream out;
-    vec.popFrontMany(3);
-    out << vec;
-    EXPECT_EQ("{ 4, 5 }", out.str());
-    EXPECT_EQ(2, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_popFront_with_reallocation) {
-    Vector<double> vec({ 99,2,3,4,5,6,7,8,9,10,11,12,13,14,15 });
-    std::stringstream out;
-    EXPECT_EQ(15, vec.getSize());
-    EXPECT_EQ(30, vec.getCapacity());
-    vec.popFront();
-    out << vec;
-    EXPECT_EQ("{ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }", out.str());
-    EXPECT_EQ(14, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_popFrontMany_with_reallocation) {
-    Vector<double> vec({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 });
-    std::stringstream out;
-    EXPECT_EQ(15, vec.getSize());
-    EXPECT_EQ(30, vec.getCapacity());
-    vec.popFrontMany(3);
-    out << vec;
-    EXPECT_EQ("{ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }", out.str());
-    EXPECT_EQ(12, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, throw_when_try_popFront_from_empty_vector) {
-    Vector<double> vec;
-    EXPECT_THROW(vec.popFront(), std::logic_error);
-}
-
-TEST(ClassVector, throw_when_try_popFrontMany_from_empty_vector) {
-    Vector<double> vec;
-    EXPECT_THROW(vec.popFrontMany(3), std::logic_error);
-}
-
-TEST(ClassVector, can_popBack) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    std::stringstream out;
-    vec.popBack();
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 4 }", out.str());
-    EXPECT_EQ(4, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_popBackMany) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    std::stringstream out;
-    vec.popBackMany(3);
-    out << vec;
-    EXPECT_EQ("{ 1, 2 }", out.str());
-    EXPECT_EQ(2, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_popBack_with_reallocation) {
-    Vector<double> vec({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 });
-    std::stringstream out;
-    EXPECT_EQ(15, vec.getSize());
-    EXPECT_EQ(30, vec.getCapacity());
-    vec.popBack();
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 }", out.str());
-    EXPECT_EQ(14, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_popBackMany_with_reallocation) {
-    Vector<double> vec({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 });
-    std::stringstream out;
-    EXPECT_EQ(16, vec.getSize());
-    EXPECT_EQ(30, vec.getCapacity());
-    vec.popBackMany(5);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 }", out.str());
-    EXPECT_EQ(11, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, throw_when_try_popBack_from_empty_vector) {
-    Vector<double> vec;
-    EXPECT_THROW(vec.popBack(), std::logic_error);
-}
-
-TEST(ClassVector, throw_when_try_popBackMany_from_empty_vector) {
-    Vector<double> vec;
-    EXPECT_THROW(vec.popBackMany(3), std::logic_error);
-}
-
-TEST(ClassVector, can_correctly_recalc_back_in_area_of_zero) {
-    Vector<double> vec;
-
-    for (size_t i = 0; i < 14; i++) {
-        vec.pushBack(i + 1);
-    }
-
-    vec.popFront();
-    vec.pushBack(15);
-
-    EXPECT_EQ(14, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-    EXPECT_DOUBLE_EQ(15.0, vec[vec.getSize()-1]);
-
-    for (size_t i = 0; i < vec.getSize(); i++) {
-        EXPECT_DOUBLE_EQ(vec[i], i + 2);
-    }
-
-    vec.popBack();
-
-    EXPECT_EQ(13, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-    EXPECT_DOUBLE_EQ(14.0, vec[vec.getSize()-1]);
-
-    for (size_t i = 0; i < vec.getSize(); i++) {
-        EXPECT_DOUBLE_EQ(vec[i], i + 2);
-    }
-}
-
-TEST(ClassVector, can_correctly_recalc_front_in_area_of_zero) {
-    Vector<double> vec;
-
-    for (size_t i = 0; i < 14; i++) {
-        vec.pushBack(i + 1);
-    }
-
-    vec.popBack();
-    vec.pushFront(0);
-
-    EXPECT_EQ(14, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-    EXPECT_DOUBLE_EQ(0.0, vec[0]);
-
-    for (size_t i = 0; i < vec.getSize() - 1; i++) {
-        EXPECT_DOUBLE_EQ(vec[i + 1], i + 1);
-    }
-
-    vec.popFront();
-
-    EXPECT_EQ(13, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-    EXPECT_DOUBLE_EQ(1.0, vec[0]);
-
-    for (size_t i = 0; i < vec.getSize(); i++) {
-        EXPECT_DOUBLE_EQ(vec[i], i + 1);
-    }
-}
-
-TEST(ClassVector, can_erase) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    std::stringstream out;
-    vec.erase(2);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 4, 5 }", out.str());
-    EXPECT_EQ(4, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_eraseMany) {
-    Vector<double> vec({ 1,2,3,4,5,6,7,8 });
-    std::stringstream out;
-    vec.eraseMany(2, 3);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 6, 7, 8 }", out.str());
-    EXPECT_EQ(5, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_erase_front) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    std::stringstream out;
-    vec.erase(0);
-    out << vec;
-    EXPECT_EQ("{ 2, 3, 4, 5 }", out.str());
-    EXPECT_EQ(4, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_erase_back) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    std::stringstream out;
-    vec.erase(4);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 4 }", out.str());
-    EXPECT_EQ(4, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_erase_with_reallocation) {
-    Vector<double> vec({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 });
-    std::stringstream out;
-    EXPECT_EQ(15, vec.getSize());
-    EXPECT_EQ(30, vec.getCapacity());
-    vec.erase(5);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15 }", out.str());
-    EXPECT_EQ(14, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, can_eraseMany_with_reallocation) {
-    Vector<double> vec({ 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 });
-    std::stringstream out;
-    EXPECT_EQ(16, vec.getSize());
-    EXPECT_EQ(30, vec.getCapacity());
-    vec.eraseMany(5, 3);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 4, 5, 9, 10, 11, 12, 13, 14, 15, 16 }", out.str());
-    EXPECT_EQ(13, vec.getSize());
-    EXPECT_EQ(15, vec.getCapacity());
-}
-
-TEST(ClassVector, throw_when_try_erase_from_empty_vector) {
-    Vector<double> vec;
-    EXPECT_THROW(vec.erase(0), std::logic_error);
-}
-
-TEST(ClassVector, throw_when_try_eraseMany_from_empty_vector) {
-    Vector<double> vec;
-    EXPECT_THROW(vec.eraseMany(0, 3), std::logic_error);
-}
-
-TEST(ClassVector, throw_when_try_erase_with_wrong_position) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    EXPECT_THROW(vec.erase(10), std::out_of_range);
-}
-
-TEST(ClassVector, throw_when_try_eraseMany_with_wrong_count) {
-    Vector<double> vec({ 1,2,3,4,5 });
-    EXPECT_THROW(vec.eraseMany(10, 2), std::logic_error);
-    EXPECT_THROW(vec.eraseMany(2, 10), std::logic_error);
-}
-
-TEST(ClassVector, combination_push_pop_insert_erase) {
-    Vector<double> vec({ 3, 44, 5, 7, 8 });
-
-    std::stringstream out;
-    out << vec;
-    EXPECT_EQ("{ 3, 44, 5, 7, 8 }", out.str());
-    out.str("");
-
-    vec.popFront();
-    out << vec;
-    EXPECT_EQ("{ 44, 5, 7, 8 }", out.str());
-    out.str("");
-
-    for (size_t i = 0; i < 4; i++) {
-        vec.pushFront(3 - i);
-    }
-    out << vec;
-    EXPECT_EQ("{ 0, 1, 2, 3, 44, 5, 7, 8 }", out.str());
-    out.str("");
-
-    vec.popBack();
-    out << vec;
-    EXPECT_EQ("{ 0, 1, 2, 3, 44, 5, 7 }", out.str());
-    out.str("");
-
-    for (size_t i = 0; i < 4; i++) {
-        vec.pushBack(8 + i);
-    }
-    out << vec;
-    EXPECT_EQ("{ 0, 1, 2, 3, 44, 5, 7, 8, 9, 10, 11 }", out.str());
-    out.str("");
-
-    vec.erase(0);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 44, 5, 7, 8, 9, 10, 11 }", out.str());
-    out.str("");
-
-    vec.erase(3);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 5, 7, 8, 9, 10, 11 }", out.str());
-    out.str("");
-
-    vec.insert(6, 4);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 5, 6, 7, 8, 9, 10, 11 }", out.str());
-    out.str("");
-
-    for (size_t i = 0; i < 5; i++) {
-        vec.pushBack(12 + i);
-    }
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }", out.str());
-    out.str("");
-
-    vec.insert(4, 3);
-    out << vec;
-    EXPECT_EQ("{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 }", out.str());
-    out.str("");
-
-    EXPECT_EQ(16, vec.getSize());
-    EXPECT_EQ(30, vec.getCapacity());
-
-    for (size_t i = 0; i < vec.getSize(); i++) {
-        EXPECT_DOUBLE_EQ(vec[i], i + 1);
-    }
-}
-
-TEST(ClassVector, can_assigment) {
-    Vector<double> vec_1{ 1,2,3,4 };
-    Vector<double> vec_2;
-
-    vec_2 = vec_1;
-
-    EXPECT_EQ(4, vec_1.getSize());
-    EXPECT_EQ(15, vec_1.getCapacity());
-    EXPECT_EQ(4, vec_2.getSize());
-    EXPECT_EQ(15, vec_2.getCapacity());
-
-    for (size_t i = 0; i < vec_2.getSize(); i++) {
-        EXPECT_DOUBLE_EQ(vec_1[i], vec_2[i]);
-        EXPECT_DOUBLE_EQ(vec_2[i], i + 1);
-    }
-
-    vec_1.popBack();
-    EXPECT_EQ(3, vec_1.getSize());
-    EXPECT_EQ(4, vec_2.getSize());
-}
-
-TEST(ClassVector, can_move_assigment) {
-    Vector<double> vec_1;
-    Vector<double> vec_2;
-
-    for (size_t i = 0; i < 4; i++) {
-        vec_1.pushBack(5 + i);
-    }
-
-    for (size_t i = 0; i < 4; i++) {
-        vec_1.pushFront(4 - i);
-    }
-
-    vec_2 = std::move(vec_1);
-
-    EXPECT_EQ(0, vec_1.getSize());
-    EXPECT_EQ(0, vec_1.getCapacity());
-
-    EXPECT_EQ(8, vec_2.getSize());
-    EXPECT_EQ(15, vec_2.getCapacity());
-
-    for (size_t i = 0; i < vec_2.getSize(); i++) {
-        EXPECT_DOUBLE_EQ(vec_2[i], i + 1);
-    }
+TEST(MemDataTest, ShiftLeft) {
+    MemData<int> m(10);
+    for (size_t i = 0; i < 6; ++i) m[i] = static_cast<int>(i);
+
+    m.shiftLeft(1, 3); // сдвигает элементы [2,3,4] влево на 1
+
+    EXPECT_EQ(m[0], 0);
+    EXPECT_EQ(m[1], 2); // было m[2]
+    EXPECT_EQ(m[2], 3); // было m[3]
+    EXPECT_EQ(m[3], 4); // было m[4]
 }
 
 #endif
 
-#ifdef MATH_VECTOR_TESTS
-#include "mathvector.h"
-TEST(ClassMathVector, can_create_with_default_constructor) {
-    EXPECT_EQ(1, 1);
+#ifdef VECTOR_TEST
+
+TEST(VectorTest, DefaultConstructor) {
+    Vector<int> v;
+    EXPECT_EQ(v.size(), 0u);
+    EXPECT_TRUE(v.isEmpty());
 }
+
+TEST(VectorTest, ConstructorWithSize) {
+    Vector<int> v(5);
+    EXPECT_EQ(v.size(), 5u);
+    for (size_t i = 0; i < 5; ++i) {
+        EXPECT_EQ(v[i], 0);
+    }
+}
+
+TEST(VectorTest, ConstructorWithArray) {
+    int arr[] = { 1, 2, 3, 4, 5 };
+    Vector<int> v(5, arr);
+    EXPECT_EQ(v.size(), 5u);
+    for (size_t i = 0; i < 5; ++i) {
+        EXPECT_EQ(v[i], arr[i]);
+    }
+}
+
+TEST(VectorTest, InitializerListConstructor) {
+    Vector<int> v{ 1, 2, 3, 4, 5 };
+    EXPECT_EQ(v.size(), 5u);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[4], 5);
+}
+
+TEST(VectorTest, CopyConstructor) {
+    Vector<int> v1{ 1, 2, 3 };
+    Vector<int> v2(v1);
+    EXPECT_EQ(v2.size(), 3u);
+    EXPECT_EQ(v2[0], 1);
+    EXPECT_EQ(v2[2], 3);
+}
+
+TEST(VectorTest, MoveConstructor) {
+    Vector<int> v1{ 1, 2, 3 };
+    Vector<int> v2(std::move(v1));
+    EXPECT_EQ(v2.size(), 3u);
+    EXPECT_EQ(v1.size(), 0u);
+}
+
+TEST(VectorTest, PushBack) {
+    Vector<int> v;
+    v.pushBack(1);
+    v.pushBack(2);
+    v.pushBack(3);
+    EXPECT_EQ(v.size(), 3u);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[1], 2);
+    EXPECT_EQ(v[2], 3);
+}
+
+TEST(VectorTest, PushFront) {
+    Vector<int> v;
+    v.pushFront(1);
+    v.pushFront(2);
+    v.pushFront(3);
+    EXPECT_EQ(v.size(), 3u);
+    EXPECT_EQ(v[0], 3);
+    EXPECT_EQ(v[1], 2);
+    EXPECT_EQ(v[2], 1);
+}
+
+TEST(VectorTest, PushFrontMany) {
+    Vector<int> v;
+    int arr[] = { 1, 2, 3 };
+    v.pushFrontMany(arr, 3);
+    EXPECT_EQ(v.size(), 3u);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[1], 2);
+    EXPECT_EQ(v[2], 3);
+}
+
+TEST(VectorTest, PushBackMany) {
+    Vector<int> v;
+    int arr[] = { 1, 2, 3 };
+    v.pushBackMany(arr, 3);
+    EXPECT_EQ(v.size(), 3u);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[2], 3);
+}
+
+TEST(VectorTest, PopBack) {
+    Vector<int> v{ 1, 2, 3 };
+    v.popBack();
+    EXPECT_EQ(v.size(), 2u);
+    EXPECT_EQ(v[1], 2);
+}
+
+TEST(VectorTest, PopBackEmpty) {
+    Vector<int> v;
+    EXPECT_THROW(v.popBack(), std::logic_error);
+}
+
+TEST(VectorTest, PopFront) {
+    Vector<int> v{ 1, 2, 3 };
+    v.popFront();
+    EXPECT_EQ(v.size(), 2u);
+    EXPECT_EQ(v[0], 2);
+}
+
+TEST(VectorTest, PopFrontEmpty) {
+    Vector<int> v;
+    EXPECT_THROW(v.popFront(), std::logic_error);
+}
+
+TEST(VectorTest, Insert) {
+    Vector<int> v{ 1, 2, 4, 5 };
+    v.insert(3, 2);
+    EXPECT_EQ(v.size(), 5u);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[1], 2);
+    EXPECT_EQ(v[2], 3);
+    EXPECT_EQ(v[3], 4);
+    EXPECT_EQ(v[4], 5);
+}
+
+TEST(VectorTest, InsertAtBeginning) {
+    Vector<int> v{ 2, 3 };
+    v.insert(1, 0);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[1], 2);
+}
+
+TEST(VectorTest, InsertAtEnd) {
+    Vector<int> v{ 1, 2 };
+    v.insert(3, 2);
+    EXPECT_EQ(v[2], 3);
+}
+
+TEST(VectorTest, InsertOutOfRange) {
+    Vector<int> v{ 1, 2, 3 };
+    EXPECT_THROW(v.insert(5, 10), std::out_of_range);
+}
+
+TEST(VectorTest, Erase) {
+    Vector<int> v{ 1, 2, 3, 4, 5 };
+    v.erase(2);
+    EXPECT_EQ(v.size(), 4u);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[1], 2);
+    EXPECT_EQ(v[2], 4);
+    EXPECT_EQ(v[3], 5);
+}
+
+TEST(VectorTest, EraseFirst) {
+    Vector<int> v{ 1, 2, 3 };
+    v.erase(0);
+    EXPECT_EQ(v.size(), 2u);
+    EXPECT_EQ(v[0], 2);
+}
+
+TEST(VectorTest, EraseLast) {
+    Vector<int> v{ 1, 2, 3 };
+    v.erase(2);
+    EXPECT_EQ(v.size(), 2u);
+    EXPECT_EQ(v[1], 2);
+}
+
+TEST(VectorTest, EraseOutOfRange) {
+    Vector<int> v{ 1, 2, 3 };
+    EXPECT_THROW(v.erase(5), std::out_of_range);
+}
+
+TEST(VectorTest, Front) {
+    Vector<int> v{ 1, 2, 3 };
+    EXPECT_EQ(v.front(), 1);
+}
+
+TEST(VectorTest, Back) {
+    Vector<int> v{ 1, 2, 3 };
+    EXPECT_EQ(v.back(), 3);
+}
+
+TEST(VectorTest, FrontEmpty) {
+    Vector<int> v;
+    EXPECT_THROW(v.front(), std::logic_error);
+}
+
+TEST(VectorTest, BackEmpty) {
+    Vector<int> v;
+    EXPECT_THROW(v.back(), std::logic_error);
+}
+
+TEST(VectorTest, ResizeSmaller) {
+    Vector<int> v{ 1, 2, 3, 4, 5 };
+    v.resize(3);
+    EXPECT_EQ(v.size(), 3u);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[2], 3);
+}
+
+TEST(VectorTest, ResizeLarger) {
+    Vector<int> v{ 1, 2, 3 };
+    v.resize(5);
+    EXPECT_EQ(v.size(), 5u);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[2], 3);
+}
+
+TEST(VectorTest, Clear) {
+    Vector<int> v{ 1, 2, 3 };
+    v.clear();
+    EXPECT_EQ(v.size(), 0u);
+    EXPECT_TRUE(v.isEmpty());
+}
+
+TEST(VectorTest, CopyAssignment) {
+    Vector<int> v1{ 1, 2, 3 };
+    Vector<int> v2;
+    v2 = v1;
+    EXPECT_EQ(v2.size(), 3u);
+    EXPECT_EQ(v2[0], 1);
+}
+
+TEST(VectorTest, MoveAssignment) {
+    Vector<int> v1{ 1, 2, 3 };
+    Vector<int> v2;
+    v2 = std::move(v1);
+    EXPECT_EQ(v2.size(), 3u);
+    EXPECT_EQ(v1.size(), 0u);
+}
+
+TEST(VectorTest, EqualitySameContentDifferentLayout) {
+    Vector<int> v1;
+    v1.pushBack(1);
+    v1.pushBack(2);
+
+    Vector<int> v2;
+    v2.pushFront(2);
+    v2.pushFront(1);
+
+    // Содержимое одинаковое: [1, 2]
+    EXPECT_EQ(v1[0], v2[0]);
+    EXPECT_EQ(v1[1], v2[1]);
+
+    EXPECT_TRUE(v1 == v2);
+}
+
+TEST(VectorTest, Inequality) {
+    Vector<int> v1{ 1, 2, 3 };
+    Vector<int> v2{ 1, 2, 4 };
+    EXPECT_FALSE(v1 == v2);
+}
+
+TEST(VectorTest, IteratorBasic) {
+    Vector<int> v{ 1, 2, 3, 4, 5 };
+    int sum = 0;
+    for (auto it = v.begin(); it != v.end(); ++it) {
+        sum += *it;
+    }
+    EXPECT_EQ(sum, 15);
+}
+
+TEST(VectorTest, IteratorDecrement) {
+    Vector<int> v{ 1, 2, 3 };
+    auto it = v.end();
+    --it;
+    EXPECT_EQ(*it, 3);
+    --it;
+    EXPECT_EQ(*it, 2);
+}
+
+TEST(VectorTest, IteratorArithmetic) {
+    Vector<int> v{ 10, 20, 30, 40, 50 };
+    auto it = v.begin();
+    it += 2;
+    EXPECT_EQ(*it, 30);
+    it -= 1;
+    EXPECT_EQ(*it, 20);
+}
+
+TEST(VectorTest, EmptyVectorIterator_FAILS_DUE_TO_BUG) {
+    Vector<int> v;
+    // begin() и end() вызывают front() и back(), которые бросают исключение
+    EXPECT_NO_THROW({
+        auto b = v.begin();
+        auto e = v.end();
+        EXPECT_EQ(b, e);
+        });
+}
+
+TEST(VectorTest, ConstIterator) {
+    const Vector<int> v{ 1, 2, 3 };
+    int sum = 0;
+    for (auto it = v.cbegin(); it != v.cend(); ++it) {
+        sum += *it;
+    }
+    EXPECT_EQ(sum, 6);
+}
+
+TEST(VectorTest, ManyPushFrontAndBack) {
+    Vector<int> v;
+    for (int i = 0; i < 100; ++i) {
+        if (i % 2 == 0) v.pushBack(i);
+        else v.pushFront(i);
+    }
+    EXPECT_EQ(v.size(), 100u);
+}
+
+TEST(VectorTest, OutputOperator) {
+    Vector<int> v{ 1, 2, 3 };
+    std::stringstream ss;
+    ss << v;
+    EXPECT_EQ(ss.str(), "{1 2 3}\n");
+}
+
+TEST(VectorTest, InputOperator) {
+    std::stringstream ss("10 20 30");
+    Vector<int> v;
+    ss >> v;
+    EXPECT_EQ(v.size(), 3u);
+    EXPECT_EQ(v[0], 10);
+    EXPECT_EQ(v[2], 30);
+}
+
+#endif
+
+#ifdef MATHVECTOR_TEST
+
+TEST(MathVectorTest, DefaultConstructor) {
+    MathVector<int> v;
+    EXPECT_EQ(v.size(), 0);
+}
+
+TEST(MathVectorTest, ConstructorWithSize) {
+    MathVector<int> v(5);
+    EXPECT_EQ(v.size(), 5);
+    for (size_t i = 0; i < 5; ++i) {
+        EXPECT_EQ(v[i], 0);
+    }
+}
+
+TEST(MathVectorTest, InitializerListConstructor) {
+    MathVector<int> v{ 1, 2, 3 };
+    EXPECT_EQ(v.size(), 3);
+    EXPECT_EQ(v[0], 1);
+    EXPECT_EQ(v[2], 3);
+}
+
+TEST(MathVectorTest, CopyConstructor) {
+    MathVector<int> v1{ 1, 2, 3 };
+    MathVector<int> v2(v1);
+    EXPECT_EQ(v2.size(), 3);
+    EXPECT_EQ(v2[0], 1);
+}
+
+TEST(MathVectorTest, ScalarMultiplication) {
+    MathVector<int> v{ 1, 2, 3 };
+    MathVector<int> result = v * 2;
+    EXPECT_EQ(result[0], 2);
+    EXPECT_EQ(result[1], 4);
+    EXPECT_EQ(result[2], 6);
+}
+
+TEST(MathVectorTest, ScalarMultiplicationAssign) {
+    MathVector<int> v{ 1, 2, 3 };
+    v *= 3;
+    EXPECT_EQ(v[0], 3);
+    EXPECT_EQ(v[1], 6);
+    EXPECT_EQ(v[2], 9);
+}
+
+TEST(MathVectorTest, Addition) {
+    MathVector<int> v1{ 1, 2, 3 };
+    MathVector<int> v2{ 4, 5, 6 };
+    MathVector<int> result = v1 + v2;
+    EXPECT_EQ(result[0], 5);
+    EXPECT_EQ(result[1], 7);
+    EXPECT_EQ(result[2], 9);
+}
+
+TEST(MathVectorTest, Subtraction) {
+    MathVector<int> v1{ 4, 5, 6 };
+    MathVector<int> v2{ 1, 2, 3 };
+    MathVector<int> result = v1 - v2;
+    EXPECT_EQ(result[0], 3);
+    EXPECT_EQ(result[1], 3);
+    EXPECT_EQ(result[2], 3);
+}
+
+TEST(MathVectorTest, DotProduct) {
+    MathVector<int> v1{ 1, 2, 3 };
+    MathVector<int> v2{ 4, 5, 6 };
+    int result = v1 * v2;
+    EXPECT_EQ(result, 32); // 1*4 + 2*5 + 3*6 = 32
+}
+
+TEST(MathVectorTest, AdditionAssign) {
+    MathVector<int> v1{ 1, 2, 3 };
+    MathVector<int> v2{ 4, 5, 6 };
+    v1 += v2;
+    EXPECT_EQ(v1[0], 5);
+    EXPECT_EQ(v1[1], 7);
+    EXPECT_EQ(v1[2], 9);
+}
+
+TEST(MathVectorTest, SubtractionAssign) {
+    MathVector<int> v1{ 4, 5, 6 };
+    MathVector<int> v2{ 1, 2, 3 };
+    v1 -= v2;
+    EXPECT_EQ(v1[0], 3);
+    EXPECT_EQ(v1[1], 3);
+    EXPECT_EQ(v1[2], 3);
+}
+
+TEST(MathVectorTest, DifferentSizes) {
+    MathVector<int> v1{ 1, 2, 3 };
+    MathVector<int> v2{ 4, 5 };
+
+    EXPECT_THROW(v1 + v2, std::logic_error);
+}
+
+TEST(MathVectorTest, Equality) {
+    MathVector<int> v1{ 1, 2, 3 };
+    MathVector<int> v2{ 1, 2, 3 };
+    EXPECT_TRUE(v1 == v2);
+}
+
+TEST(MathVectorTest, Inequality) {
+    MathVector<int> v1{ 1, 2, 3 };
+    MathVector<int> v2{ 1, 2, 4 };
+    EXPECT_FALSE(v1 == v2);
+}
+
+TEST(MathVectorTest, CopyAssignment) {
+    MathVector<int> v1{ 1, 2, 3 };
+    MathVector<int> v2;
+    v2 = v1;
+    EXPECT_EQ(v2.size(), 3);
+    EXPECT_EQ(v2[0], 1);
+}
+
+#endif
+
+#ifdef MATRIX_TEST
+
+TEST(MatrixTest, DefaultConstructorTest) {
+    Matrix<int> matrix;
+    EXPECT_EQ(matrix.getM(), 0);
+    EXPECT_EQ(matrix.getN(), 0);
+}
+TEST(MatrixTest, InitialiseWithSizeConstructorTest) {
+    Matrix<int> matrix(3,2);
+    EXPECT_EQ(matrix.getN(), 3);
+    EXPECT_EQ(matrix.getM(), 2);
+    for (size_t i = 0;i < 3;++i) {
+        EXPECT_EQ(matrix[i].size(), 2);
+    }
+}
+TEST(MatrixTest, InitialiseListConstructorTest) {
+    std::initializer_list<std::initializer_list<int>> list = { {1,1,1},{2,2,2},{3,3,3} };
+    Matrix<int> matrix(list);
+    EXPECT_EQ(matrix.getN(), 3);
+    EXPECT_EQ(matrix.getM(), 3);
+    for (size_t i = 1;i < 4;++i) {
+        EXPECT_EQ(matrix[i-1][0], i);
+        EXPECT_EQ(matrix[i - 1][1], i);
+        EXPECT_EQ(matrix[i - 1][2], i);
+    }
+}
+TEST(MatrixTest, CopyConstructorTest) {
+    Matrix<int> matrix({ {1,2,3} });
+    Matrix<int> copy(matrix);
+    EXPECT_TRUE(matrix == copy);
+}
+TEST(MatrixTest, SummaryTest) {
+    Matrix<int> matrix1({ {1,2,3} ,{1,2,3} });
+    Matrix<int> matrix2({ {4,5,6},{4,5,6} });
+    Matrix<int> matrix3({ {5,7,9} ,{5,7,9} });
+    Matrix<int> matrix4 = matrix1 + matrix2;
+    EXPECT_EQ(matrix3, matrix4);
+}
+TEST(MatrixTest, SubtractTest) {
+    Matrix<int> matrix1({ {5,7,9} ,{5,7,9} });
+    Matrix<int> matrix2({ {4,5,6},{4,5,6} });
+    Matrix<int> matrix3({ {1,2,3} ,{1,2,3} });
+    Matrix<int> matrix4 = matrix1 - matrix2;
+    EXPECT_EQ(matrix3, matrix4);
+}
+TEST(MatrixTest, MotionWithEqualsTest) {
+    Matrix<int> matrix1({ {1,2,3} ,{1,2,3} });
+    Matrix<int> matrix2({ {4,5,6},{4,5,6} });
+    Matrix<int> matrix3(matrix1);
+    Matrix<int> matrix4({ {5,7,9} ,{5,7,9} });
+    matrix1 += matrix2;
+    EXPECT_EQ(matrix1, matrix4);
+    matrix1 -= matrix2;
+    EXPECT_EQ(matrix1, matrix3);
+    Matrix<int> matrix5(matrix1);
+    matrix1 += matrix1;
+    matrix5 *= 2;
+    EXPECT_EQ(matrix1, matrix5);
+}
+TEST(MatrixTest, ThrowWithDifferentDimensionTest) {
+    Matrix<int> matrix1({ {1,2,3} ,{1,2,3} ,{1,2,3} });
+    Matrix<int> matrix2({ {4,5,6},{4,5,6} });
+    EXPECT_THROW(matrix1 + matrix2,std::logic_error);
+    EXPECT_THROW(matrix1 - matrix2, std::logic_error);
+    EXPECT_THROW(matrix1 * matrix2, std::logic_error);
+    EXPECT_THROW(matrix1 += matrix2, std::logic_error);
+    EXPECT_THROW(matrix1 -= matrix2, std::logic_error);
+}
+TEST(MatrixTest, TranspositionTest) {
+    Matrix<int> matrix1({ {1,2,3} ,{4,5,6} ,{7,8,9} });
+    Matrix<int> matrix2({ {1,4,7} ,{2,5,8} ,{3,6,9} });
+    EXPECT_NE(matrix1,matrix2);
+    matrix1 = matrix1.Transposition();
+    EXPECT_EQ(matrix1,matrix2);
+}
+TEST(MatrixTest, MultiplyTest) {
+    Matrix<int> matrix1({ {1,2,3} ,{4,5,6}});
+    Matrix<int> matrix2({ {7,8} ,{9,10} ,{11,12} });
+    EXPECT_EQ(matrix1.getN(), matrix2.getM());
+    Matrix<int> matrix3({ {58,64} ,{139,154}});
+    EXPECT_TRUE(matrix1 * matrix2 == matrix3);
+
+    Matrix<int> matrix4({ {1,2,3} ,{4,5,6} });
+    Matrix<int> matrix5({ {7,8,9} ,{1,2,3} });
+    EXPECT_NE(matrix4.getN(), matrix5.getM());
+    EXPECT_THROW(matrix4 * matrix5, std::logic_error);
+}
+TEST(MatrixTest, OutputTest) {
+    Matrix<int> matrix({ {1,2,3} ,{4,5,6},{7,8,9} });
+    std::stringstream ss;
+    ss << matrix;
+    EXPECT_EQ(ss.str(), "{1 2 3}\n{4 5 6}\n{7 8 9}\n");
+}
+
 #endif
