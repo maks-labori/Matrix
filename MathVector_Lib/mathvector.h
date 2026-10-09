@@ -13,7 +13,12 @@ public:
 	inline size_t size()const noexcept {
 		return this->Vector<T>::size();
 	}
-
+	inline void setStart(size_t value) {
+		this->_start_index = value;
+	}
+	inline size_t getStart()const noexcept {
+		return _start_index;
+	}
 	MathVector<T> operator* (const double& value)const noexcept;
 	MathVector<T>& operator*=(const double& value)noexcept;
 
@@ -34,6 +39,26 @@ public:
 	template <class friendT>
 	friend MathVector<T> operator*(const double& value, const MathVector<T>& other)noexcept;
 };
+
+template <typename T>
+std::ostream& operator<< (std::ostream& out, const MathVector<T>& vec) {
+	out << "{";
+	if (vec.isEmpty()) {
+		out << "}\n";
+		return out;
+	}
+	size_t index = vec.getStart();
+	while (index > 0) {
+		out << "0 ";
+		index--;
+	}
+	out << vec[0];
+	for (size_t i = 1;i < vec.size();++i) {
+		out << " " << vec[i];
+	}
+	out << "}\n";
+	return out;
+}
 
 template <typename T>
 MathVector<T> operator*(const double& value, const MathVector<T>& other)noexcept {

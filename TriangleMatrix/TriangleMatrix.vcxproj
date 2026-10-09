@@ -21,9 +21,10 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{10af4c37-bf99-4441-9b97-8ce5bd8e128e}</ProjectGuid>
-    <RootNamespace>MatrLib</RootNamespace>
+    <ProjectGuid>{66e6995e-9faa-4fe5-a760-27e96892c0f2}</ProjectGuid>
+    <RootNamespace>TriangleMatrix</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>TriangleMatrix_Lib</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -102,7 +103,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\maksi\OneDrive\Desktop\super_lab_university\MathVector_Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\maksi\OneDrive\Desktop\super_lab_university\MathVector_Lib;C:\Users\maksi\OneDrive\Desktop\super_lab_university\Matr_Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -124,15 +125,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="matrix.h" />
+    <ClCompile Include="trianglematrix.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MathVector_Lib\MathVector_Lib.vcxproj">
-      <Project>{c5d28ef8-ae75-4ea2-957c-471d9c76fbf8}</Project>
+    <ClInclude Include="trianglematrix.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Matr_Lib\Matr_Lib.vcxproj">
+      <Project>{10af4c37-bf99-4441-9b97-8ce5bd8e128e}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="matr.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
