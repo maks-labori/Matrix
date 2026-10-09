@@ -63,6 +63,8 @@ public:
 		Iterator<Type> operator- (size_t offset) {
 			return Iterator<Type>(current_ - offset);
 		}
+		bool operator==(const Iterator<Type>& it)const noexcept { return (*current_ == *it.current_); }
+		bool operator!=(const Iterator<Type>& it)const noexcept { return !((*this) == it); }
 	};
 
 	template<class Type> class Iterator;

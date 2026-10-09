@@ -2,9 +2,9 @@
 #include "matrix.h"
 
 
-//#define MEMDATA_TEST
-//#define VECTOR_TEST
-//#define MATHVECTOR_TEST
+#define MEMDATA_TEST
+#define VECTOR_TEST
+#define MATHVECTOR_TEST
 #define MATRIX_TEST
 
 #ifdef MEMDATA_TEST

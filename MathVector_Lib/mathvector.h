@@ -42,18 +42,17 @@ public:
 
 template <typename T>
 std::ostream& operator<< (std::ostream& out, const MathVector<T>& vec) {
+	size_t start = vec.getStart();
 	out << "{";
 	if (vec.isEmpty()) {
 		out << "}\n";
 		return out;
 	}
-	size_t index = vec.getStart();
-	while (index > 0) {
+	for (size_t i = 0; i < start; ++i) {
 		out << "0 ";
-		index--;
 	}
-	out << vec[0];
-	for (size_t i = 1;i < vec.size();++i) {
+	out << vec[start];
+	for (size_t i = start+1;i < vec.size()+start;++i) {
 		out << " " << vec[i];
 	}
 	out << "}\n";
@@ -150,12 +149,14 @@ MathVector<T>& MathVector<T>::operator=(const MathVector<T>& other)noexcept{
 
 template <typename T>
 const T& MathVector<T>::operator[](size_t index)const {
-	return (*this).Vector<T>::operator[](index);
+	if (index < getStart()) { throw std::out_of_range("out of range"); }
+	return (*this).Vector<T>::operator[](index-_start_index);
 }
 
 template <typename T>
 T& MathVector<T>::operator[](size_t index) {
-	return (*this).Vector<T>::operator[](index);
+	if (index < getStart()) { throw std::out_of_range("out of range"); }
+	return (*this).Vector<T>::operator[](index-_start_index);
 }
 
 template <typename T>

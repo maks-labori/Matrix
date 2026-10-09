@@ -3,13 +3,12 @@
 #include "matrix.h"
 #include "trianglematrix.h"
 int main() {
-	std::initializer_list<std::initializer_list<int>> list = { {1,1,1},{2,5,4},{1,4,6} };
+	std::initializer_list<std::initializer_list<int>> list = { {2,4,-2,4},{1,5,1,7},{-1,1,1,1},{2,4,2,1} };
 	Matrix<int> matrix(list);
 	TriangleMatrix<int> trianglematrix(matrix);
-	std::cout << trianglematrix;
-	//std::cout << trianglematrix[0][0] << " " << trianglematrix[0][1] << " " << trianglematrix[0][2] <<"\n";
-	//std::cout << trianglematrix[1][0] << " " << trianglematrix[1][1] << " " << trianglematrix[1][2] << "\n";
-	//std::cout << trianglematrix[2][0] << " " << trianglematrix[2][1] << " " << trianglematrix[2][2] << "\n";
+
+	std::cout << trianglematrix << "\n" << trianglematrix.calcDeterminant();
+
 
 	return 0;
 }

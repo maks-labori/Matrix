@@ -17,9 +17,6 @@ public:
     TriangleMatrix(const MathVector<MathVector<T>>&);
     TriangleMatrix(const TriangleMatrix&);
 
-    //template <class friendT>
-    //std::ostream& operator<<(std::ostream&, const TriangleMatrix&);
-
     double calcDeterminant()const noexcept;
 
     bool operator==(const TriangleMatrix<T>&)const noexcept;
@@ -54,7 +51,7 @@ TriangleMatrix<T>::TriangleMatrix(std::initializer_list<std::initializer_list<T>
         (*this)[j].MathVector<T>::setStart(start);
         const T* row_elem = row.begin();
         for (size_t ind = 0;ind < count;++ind) {
-            (*this)[j][ind] = row_elem[start + ind];
+            (*this)[j][ind+start] = row_elem[start + ind];
         }
         j++;start++;
     }
@@ -105,8 +102,8 @@ TriangleMatrix<T>::TriangleMatrix(const Matrix<T>& other):MathVector<MathVector<
     for (size_t i = 0;i < other_N;++i) {
         (*this)[i] = MathVector<T>(other_N-i);
         (*this)[i].MathVector<T>::setStart(i);
-        for (size_t j = 0;j < other_N-i;++j) {
-            (*this)[i][j] = res[i][i + j];
+        for (size_t j = i;j < other_N;++j) {
+            (*this)[i][j] = res[i][j];
         }
     }
 
@@ -117,7 +114,7 @@ double TriangleMatrix<T>::calcDeterminant()const noexcept {
     if ((*this).getN() == 0) { return 0; }
     double res = (*this)[0][0];
     for (size_t i = 1;i < (*this).getN();++i) {
-        res *= (*this)[i][0];
+        res *= (*this)[i][i];
     }
     return res;
 }
