@@ -1,6 +1,7 @@
 #include "vector.h"
-
+#include "mathvector.h"
+#include "matrix.h"
+#include "trianglematrix.h"
 int main() {
-	std::cout << "Start";
 	return 0;
 }
