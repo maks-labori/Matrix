@@ -40,6 +40,27 @@ public:
 	friend MathVector<T> operator*(const double& value, const MathVector<T>& other)noexcept;
 };
 
+
+template<class T>
+std::istream& operator>> (std::istream& in, MathVector<T>& vec) {
+	T element;
+	size_t target = vec.size();
+	size_t count = 0;
+	while (count < target) {
+		try {
+			in >> element;
+			vec[count] = element;
+			count++;
+		}
+		catch (...) {
+			in.clear();
+			std::cout << "Error input ,try again";
+			break;
+		}
+	}
+	return in;
+}
+
 template <typename T>
 std::ostream& operator<< (std::ostream& out, const MathVector<T>& vec) {
 	size_t start = vec.getStart();

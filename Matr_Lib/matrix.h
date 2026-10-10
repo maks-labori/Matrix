@@ -32,6 +32,14 @@ std::ostream& operator<< (std::ostream& out, Matrix<T>& matrix) {
 }
 
 template <typename T>
+std::istream& operator>> (std::istream& in, Matrix<T>& matrix) {
+	for (size_t i = 0;i < matrix.getN();++i) {
+		in >> matrix[i];
+	}
+	return in;
+}
+
+template <typename T>
 Matrix<T>::Matrix() :MathVector<MathVector<T>>() {}
 
 template <typename T>
