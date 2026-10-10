@@ -3,11 +3,10 @@
 #include "matrix.h"
 #include "trianglematrix.h"
 int main() {
-	std::initializer_list<std::initializer_list<int>> list = { {2,4,-2,4},{1,5,1,7},{-1,1,1,1},{2,4,2,1} };
-	Matrix<int> matrix(list);
-	TriangleMatrix<int> trianglematrix(matrix);
-
-	std::cout << trianglematrix << "\n" << trianglematrix.calcDeterminant();
+	TriangleMatrix<int> matrix1 = { {1,2,3},{0,2,3},{0,0,3} };
+	TriangleMatrix<int> matrix2 = { {1,2,3},{0,2,3},{0,0,3} };
+	matrix1 = matrix1.Transposition();
+	std::cout << matrix1;
 
 
 	return 0;

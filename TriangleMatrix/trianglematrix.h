@@ -21,6 +21,9 @@ public:
 
     bool operator==(const TriangleMatrix<T>&)const noexcept;
     bool operator!=(const TriangleMatrix<T>&)const noexcept;
+
+    //TriangleMatrix<T> operator*(const TriangleMatrix<T>&)const;
+    //TriangleMatrix<T> Transposition()const noexcept;
 };
 
 template <typename T>
@@ -60,9 +63,10 @@ TriangleMatrix<T>::TriangleMatrix(std::initializer_list<std::initializer_list<T>
 template <typename T>
 TriangleMatrix<T>::TriangleMatrix(const MathVector<MathVector<T>>& other):MathVector<MathVector<T>>(other.size()) {
     size_t other_size = other.size(); 
-    for (size_t i = 0;i < other_size();++i) {
-        (*this)[i] = MathVector<T>(other[i].size() - i);
+    for (size_t i = 0;i < other_size;++i) {
+        (*this)[i] = MathVector<T>(other.size() - i);
         (*this)[i].MathVector<T>::setStart(i);
+        (*this)[i] = other[i];
     }
 }
 
@@ -118,3 +122,31 @@ double TriangleMatrix<T>::calcDeterminant()const noexcept {
     }
     return res;
 }
+
+
+//template <typename T>
+//TriangleMatrix<T> TriangleMatrix<T>::operator*(const TriangleMatrix<T>&)const {
+//
+//}
+//
+//template <typename T>
+//TriangleMatrix<T> TriangleMatrix<T>::Transposition()const noexcept {
+//    size_t this_N = (*this).getN();
+//    Matrix<T> res(this_N,this_N);
+//    for (size_t i = 0;i < this_N;++i) {
+//        size_t start = (*this)[i].MathVector<T>::getStart();
+//        for (size_t j = 0;j < this_N;++j) {
+//            if (j < start) { res[i][j] = 0;continue; }
+//            res[i][j] = (*this)[j][i];
+//        }
+//    }
+//    TriangleMatrix<T> answer(this_N);
+//    for (size_t i = 0;i < this_N;++i) {
+//        answer[i] = MathVector<T>(this_N - i);
+//        answer[i].MathVector<T>::setStart(i);
+//        for (size_t j = i;j < this_N;++j) {
+//            answer[i][j] = res[i][j];
+//        }
+//    }
+//    return answer;
+//}

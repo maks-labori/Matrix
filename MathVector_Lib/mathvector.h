@@ -77,7 +77,7 @@ MathVector<T>::MathVector(std::initializer_list<T> data): Vector<T>(data), _star
 }
 
 template <typename T>
-MathVector<T>::MathVector(const MathVector<T>& other): Vector<T>(other), _start_index(0) {
+MathVector<T>::MathVector(const MathVector<T>& other): Vector<T>(other), _start_index(other.getStart()) {
 	this->Vector<T>::realloc(other.size());
 }
 
@@ -90,7 +90,9 @@ MathVector<T> MathVector<T>::operator*(const double& value)const noexcept{
 
 template <typename T>
 MathVector<T>& MathVector<T>::operator*=(const double& value)noexcept{
-	for (int i = 0;i < this->size();++i) {
+	size_t start = _start_index;
+	size_t size = (*this).size();
+	for (size_t i = start;i < start+size;++i) {
 		(*this)[i] *= value;
 	}
 	return (*this);
@@ -98,9 +100,11 @@ MathVector<T>& MathVector<T>::operator*=(const double& value)noexcept{
 
 template <typename T>
 MathVector<T> MathVector<T>::operator+(const MathVector<T>& other)const{
-	if (this->size() != other.size()) { throw std::logic_error("different size"); }
+	if (this->size() != other.size() || this->getStart() != other.getStart()) { throw std::logic_error("different size"); }
 	MathVector<T> res(*this);
-	for (int i = 0;i < this->size();++i) {
+	size_t size = (*this).size();
+	size_t start = (*this).getStart();
+	for (size_t i = start;i < size + start;++i) {
 		res[i] = (*this)[i] + other[i];
 	}
 	return res;
@@ -108,9 +112,11 @@ MathVector<T> MathVector<T>::operator+(const MathVector<T>& other)const{
 
 template <typename T>
 MathVector<T> MathVector<T>::operator-(const MathVector<T>& other)const{
-	if (this->size() != other.size()) { throw std::logic_error("different size"); }
+	if (this->size() != other.size() || this->getStart() != other.getStart()) { throw std::logic_error("different size"); }
 	MathVector<T> res(*this);
-	for (int i = 0;i < this->size();++i) {
+	size_t size = (*this).size();
+	size_t start =(*this).getStart();
+	for (size_t i = start;i < size+start;++i) {
 		res[i] = (*this)[i] - other[i];
 	}
 	return res;
@@ -118,9 +124,11 @@ MathVector<T> MathVector<T>::operator-(const MathVector<T>& other)const{
 
 template <typename T>
 double MathVector<T>::operator* (const MathVector<T>& other)const{
-	if ((*this).size() != other.size()) { throw std::logic_error("different dimension"); }
+	if ((*this).size() != other.size() || this->getStart() != other.getStart()) { throw std::logic_error("different dimension"); }
 	double res = 0.0;
-	for (int i = 0;i < this->size();++i) {
+	size_t size = (*this).size();
+	size_t start = (*this).getStart();
+	for (int i = start;i < start+size;++i) {
 		res += (*this)[i] * other[i];
 	}
 	return res;
