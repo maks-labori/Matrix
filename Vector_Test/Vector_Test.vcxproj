@@ -57,7 +57,7 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>C:\Users\maksi\OneDrive\Desktop\super_lab_university\Matr_Lib;C:\Users\maksi\OneDrive\Desktop\super_lab_university\MathVector_Lib;C:\Users\maksi\OneDrive\Desktop\super_lab_university\Vector_Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\maksi\OneDrive\Desktop\super_lab_university\TriangleMatrix;C:\Users\maksi\OneDrive\Desktop\super_lab_university\Matr_Lib;C:\Users\maksi\OneDrive\Desktop\super_lab_university\MathVector_Lib;C:\Users\maksi\OneDrive\Desktop\super_lab_university\Vector_Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -117,6 +117,9 @@
     </ProjectReference>
     <ProjectReference Include="..\Matr_Lib\Matr_Lib.vcxproj">
       <Project>{10af4c37-bf99-4441-9b97-8ce5bd8e128e}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\TriangleMatrix\TriangleMatrix.vcxproj">
+      <Project>{66e6995e-9faa-4fe5-a760-27e96892c0f2}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Vector_Lib\Vector_Lib.vcxproj">
       <Project>{cd6e2de5-2c90-417e-bd3d-7fcbfa7382ee}</Project>

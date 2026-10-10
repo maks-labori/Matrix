@@ -23,7 +23,6 @@ public:
     bool operator!=(const TriangleMatrix<T>&)const noexcept;
 
     TriangleMatrix<T> operator*(const TriangleMatrix<T>&)const;
-    TriangleMatrix<T> Transposition()const noexcept;
 };
 
 template <typename T>
@@ -126,13 +125,14 @@ double TriangleMatrix<T>::calcDeterminant()const noexcept {
 
 template <typename T>
 TriangleMatrix<T> TriangleMatrix<T>::operator*(const TriangleMatrix<T>& other)const {
+    if ((*this).getN() != other.getN()) { throw std::logic_error("deferent dimension"); }
     size_t size = other.getN();
     TriangleMatrix<T> res(size);
     for (size_t i = 0;i < size;++i) {
         size_t start = (*this)[i].MathVector<T>::getStart();
         for (size_t j = 0;j < size;++j) {
             for (size_t z = start;z < size+start;++z) {
-                if (z < (*this)[i].getStart() || j < other[z].getStart()) { continue; }
+                if (z < (*this)[i].MathVector<T>::getStart() || j < other[z].MathVector<T>::getStart()) { continue; }
                 res[i][j] += (*this)[i][z] * other[z][j];
             }
         }

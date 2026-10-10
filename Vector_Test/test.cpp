@@ -1,11 +1,12 @@
 #include "pch.h"
-#include "matrix.h"
+#include "trianglematrix.h"
 
 
 #define MEMDATA_TEST
 #define VECTOR_TEST
 #define MATHVECTOR_TEST
 #define MATRIX_TEST
+#define TRIANGLEMATRIX_TEST
 
 #ifdef MEMDATA_TEST
 
@@ -651,4 +652,119 @@ TEST(MatrixTest, OutputTest) {
     ss << matrix;
     EXPECT_EQ(ss.str(), "{1 2 3}\n{4 5 6}\n{7 8 9}\n");
 }
+#endif
+
+#ifdef TRIANGLEMATRIX_TEST
+
+TEST(TriangleMatrixTest, DefaultConstructorTest) {
+    TriangleMatrix<int> matrix;
+    EXPECT_EQ(matrix.getN(), 0);
+}
+
+TEST(TriangleMatrixTest, InitialiseWithSizeConstructorTest) {
+    TriangleMatrix<int> matrix(3);
+    size_t N = matrix.getN();
+    EXPECT_EQ(N, 3);
+    for (int i = 2;i >= 0;--i) {
+        EXPECT_EQ(matrix[i].size(), N-i);
+    }
+}
+
+TEST(TriangleMatrixTest, InitialiseListConstructorTest) {
+    std::initializer_list<std::initializer_list<int>> list = { {3,3,3},{2,2,2},{1,1,1} };
+    TriangleMatrix<int> matrix(list);
+    size_t N = matrix.getN();
+    EXPECT_EQ(N, 3);
+    for (int i = 2;i >=0;--i) {
+        EXPECT_EQ(matrix[i].size(),N-i);
+        for (int j = 0;j < matrix[i].getStart();++j) {
+            EXPECT_THROW(matrix[i][j], std::out_of_range);
+        }
+        for (int j = matrix[i].getStart();j < matrix.getN();++j) {
+            EXPECT_EQ(matrix[i][j],N-i);
+        }
+    }
+}
+
+TEST(TriangleMatrixTest,CopyConstructorTest) {
+    TriangleMatrix<int> matrix({ {1,2,3} });
+    TriangleMatrix<int> copy(matrix);
+    EXPECT_TRUE(matrix == copy);
+}
+
+TEST(TriangleMatrixTest, SummaryTest) {
+    TriangleMatrix<int> matrix1({ {1,2,3} ,{1,2,3} });
+    TriangleMatrix<int> matrix2({ {4,5,6},{4,5,6} });
+    TriangleMatrix<int> matrix3({ {5,7,9} ,{5,7,9} });
+    TriangleMatrix<int> matrix4 = matrix1 + matrix2;
+    EXPECT_EQ(matrix3, matrix4); //Ћисты обрезаютс€ без приведени€,как от матрицы
+}
+
+TEST(TriangleMatrixTest, SubtractTest) {
+    TriangleMatrix<int> matrix1({ {5,7,9} ,{5,7,9} });
+    TriangleMatrix<int> matrix2({ {4,5,6},{4,5,6} });
+    TriangleMatrix<int> matrix3({ {1,2,3} ,{1,2,3} });
+    TriangleMatrix<int> matrix4 = matrix1 - matrix2;
+    EXPECT_EQ(matrix3, matrix4);
+}
+
+TEST(TriangleMatrixTest, MotionWithEqualsTest) {
+    TriangleMatrix<int> matrix1({ {1,2,3} ,{1,2,3} });
+    TriangleMatrix<int> matrix2({ {4,5,6},{4,5,6} });
+    TriangleMatrix<int> matrix3(matrix1);
+    TriangleMatrix<int> matrix4({ {5,7,9} ,{5,7,9} });
+    matrix1 += matrix2;
+    EXPECT_EQ(matrix1, matrix4);
+    matrix1 -= matrix2;
+    EXPECT_EQ(matrix1, matrix3);
+    TriangleMatrix<int> matrix5(matrix1);
+    matrix1 += matrix1;
+    matrix5 *= 2;
+    EXPECT_EQ(matrix1, matrix5);
+}
+
+TEST(TriangleMatrixTest, ThrowWithDifferentDimensionTest) {
+    TriangleMatrix<int> matrix1({ {1,2,3} ,{1,2,3} ,{1,2,3} });
+    TriangleMatrix<int> matrix2({ {4,5,6},{4,5,6} });
+    EXPECT_THROW(matrix1 + matrix2, std::logic_error);
+    EXPECT_THROW(matrix1 - matrix2, std::logic_error);
+    EXPECT_THROW(matrix1 * matrix2, std::logic_error);
+    EXPECT_THROW(matrix1 += matrix2, std::logic_error);
+    EXPECT_THROW(matrix1 -= matrix2, std::logic_error);
+}
+
+TEST(TriangleMatrixTest, CalcDeterminantTest) {
+    TriangleMatrix<double> matrix1({ {2.5, -1.0, 4.0},{0.0, 4.0, 2.5},{0.0, 0.0, -2.0} });
+    TriangleMatrix<double> matrix2({ {3.0,  5.0, -1.0,  2.0},{0.0,  0.0,  4.0,  1.0},{0.0,  0.0, -2.0,  6.0},{0.0,  0.0,  0.0,  7.0} });
+    EXPECT_DOUBLE_EQ(matrix1.calcDeterminant(), -20.0);
+    EXPECT_DOUBLE_EQ(matrix2.calcDeterminant(), 0.0);
+}
+
+TEST(TriangleMatrixTest, MultiplyTest) {
+    TriangleMatrix<int> matrix1({ {1,2,3} ,{4,5,6}, {7,8,9} });
+    TriangleMatrix<int> matrix2({ {7,8} ,{9,10} });
+    EXPECT_NE(matrix1.getN(), matrix2.getN());
+    EXPECT_THROW(matrix1 * matrix2,std::logic_error);
+    TriangleMatrix<int> matrix4({ {2, -1,  3},{0,  4,  5},{0,  0, -3} });
+    TriangleMatrix<int> matrix5({ {3,  2, -2},{0, -1,  4},{0,  0,  2} });
+    TriangleMatrix<int> matrix_answer({ {6,5,-2},{0, -4,26},{0,0, -6}});
+    EXPECT_EQ(matrix4.getN(), matrix5.getN());
+    TriangleMatrix<int> matrix6 = matrix4 * matrix5;
+    EXPECT_EQ(matrix6,matrix_answer);
+}
+
+TEST(TriangleMatrixTest, OutputTest) {
+    TriangleMatrix<int> matrix({ {1,2,3} ,{0,5,6},{0,0,9} });
+    std::stringstream ss;
+    ss << matrix;
+    EXPECT_EQ(ss.str(), "{1 2 3}\n{0 5 6}\n{0 0 9}\n");
+}
+
+TEST(TriangleMatrixTest, ConstructorWithSimpleMatrixByGaussMethod) {
+    Matrix<int> simple_matrix = { {1,2,3},{4,5,6},{7,8,9} };
+    TriangleMatrix<int> new_matrix(simple_matrix);
+    TriangleMatrix<int> test_answer = { {1,2,3},{0,-3,-6},{0,0,0} };
+    EXPECT_EQ(new_matrix, test_answer);
+}
+
 #endif
