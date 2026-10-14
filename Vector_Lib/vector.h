@@ -6,8 +6,8 @@
 template<class T>
 class Vector {
 	MemData<T> storage_;
-	size_t front_;  // индекс первого элемента
-	size_t back_;   // индекс ПОСЛЕ последнего элемента
+	size_t front_;  // index first element
+	size_t back_;   // index after last element
 
 public:
 	Vector(size_t size = 0, const T* array = nullptr);
@@ -105,7 +105,7 @@ public:
 
 	void resize(size_t new_size);
 	void defragment() noexcept;
-	void realloc(size_t new_capacity) { // перевыделение памяти с сохранением данных
+	void realloc(size_t new_capacity) { // with save data
 		storage_.realloc(new_capacity, front_, size());
 	}
 
@@ -129,17 +129,29 @@ public:
 	void erase(size_t);
 	void eraseMany(size_t, size_t);
 
+	int line_search(T elem)const noexcept;
+
 	Vector<T>& operator=(const Vector<T>&) noexcept;
 	Vector<T>& operator=(Vector<T>&&) noexcept;
 	bool operator==(const Vector<T>&) const noexcept;
 	T& operator[](size_t) noexcept;
 	const T& operator[](size_t) const noexcept;
 private:
-	//служебный метод получения (геттер) физического индекса по относительному
+	//get true index by relative
 	size_t getDataIndex(size_t i) const noexcept {
 		return i + front_;
 	}
 };
+
+template <typename T>
+int Vector<T>::line_search(T elem)const noexcept {
+	size_t size = (*this).size();
+	for (int i = 0;i < size;++i) {
+		if (elem == (*this)[i]) { return i; }
+	}
+	return -1;
+}
+
 
 template <typename T>
 std::istream& operator>> (std::istream& in, Vector<T>& vec) {
@@ -165,24 +177,6 @@ std::ostream& operator<< (std::ostream& out, const Vector<T>& vec) {
 	return out;
 }
 
-//template<class Type>
-//std::ostream& operator<< (std::ostream& out, const Vector<Type>& vector) {
-//	size_t size = vector.size();
-//	for (size_t i = 0; i < size; i++) {
-//		out << vector[i] << ' ';
-//	}
-//	return out;
-//}
-//
-//template<class Type>
-//std::istream& operator>> (std::istream& in, Vector<Type>& vector) {
-//	Type element;
-//	while (in >> element) {
-//		vector.pushBack(element);
-//	}
-//	return in;
-//}
-
 template<class T>
 Vector<T>::Vector(size_t size, const T* array) :storage_(size, array), front_(0), back_(size) {}
 
@@ -192,7 +186,7 @@ Vector<T>::Vector(std::initializer_list<T> list) : storage_(list), front_(0), ba
 template<class T>
 Vector<T>::Vector(const Vector<T>& other) : storage_(other.size()), front_(other.front_), back_(other.back_) {
 	for (size_t i = 0; i < size(); ++i) {
-		(*this)[i] = other[i]; // копируем элементы, учитывая смещение front_
+		(*this)[i] = other[i]; //copy element with shift front_
 	}
 }
 
@@ -250,7 +244,7 @@ void Vector<T>::resize(size_t new_size) {
 	size_t current_capacity = capacity();
 
 	if (needed > current_capacity) {
-		// Если front большой — сначала дефрагментируем
+		//if front bigger,will do dafragment
 		if (front_ > current_capacity / 2) {
 			defragment(); // front_ = 0, back_ = size()
 		}
@@ -263,11 +257,11 @@ void Vector<T>::resize(size_t new_size) {
 template<class T>
 void Vector<T>::defragment() noexcept
 {
-	if (front_ == 0) return;  // уже в начале
+	if (front_ == 0) return;  // already in start
 
 	size_t current_size = size();
 
-	// Сдвигаем элементы в начало
+	// shift to start
 	for (size_t i = 0; i < current_size; ++i) {
 		storage_[i] = std::move(storage_[getDataIndex(i)]);
 	}
@@ -285,7 +279,7 @@ void Vector<T>::pushFront(const T& element) {
 		storage_.reallocWithShiftRight(storage_.calculateCapacity_(size() + 1), 0, size());
 		back_++;
 	}
-	else { // Если front_ == 0, но вектор не полный, сдвигаем элементы вправо
+	else { // If front_ == 0, but vector not full,shift right
 		storage_.shiftRight(0, size());
 		back_++;
 	}
@@ -294,7 +288,7 @@ void Vector<T>::pushFront(const T& element) {
 
 template<class T>
 void Vector<T>::pushFrontMany(const T* elements, size_t size) {
-	for (int i = size - 1; i >= 0; i--) { //идем с конца т.к. кладем в начало
+	for (int i = size - 1; i >= 0; i--) { //go from end,take in begin
 		pushFront(elements[i]);
 	}
 }
@@ -307,7 +301,7 @@ void Vector<T>::pushBack(const T& element) {
 }
 template<class T>
 void Vector<T>::pushBackMany(const T* elements, size_t size) {
-	for (int i = 0; i < size; i++) { //идем с начала т.к. кладем в конец
+	for (int i = 0; i < size; i++) { //go from front , take in end
 		pushBack(elements[i]);
 	}
 }
@@ -410,9 +404,9 @@ Vector<T>& Vector<T>::operator=(const Vector<T>& other) noexcept {
 	if (this != &other) {
 		front_ = other.front_;
 		back_ = other.back_;
-		storage_.allocateRaw(other.capacity()); // резервируем память под элементы
+		storage_.allocateRaw(other.capacity()); // reserve elements
 		for (size_t i = 0; i < size(); ++i) {
-			(*this)[i] = other[i]; // копируем элементы, учитывая смещение front_
+			(*this)[i] = other[i]; // copy elements already shift front_
 		}
 	}
 	return (*this);

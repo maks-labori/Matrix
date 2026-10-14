@@ -1,11 +1,11 @@
 #pragma once
 #include <initializer_list>
-#include <cstdlib>      // дл€ рандома
+#include <cstdlib>      // for random
 #include <ctime>
-#include <string>       // дл€ std::getline
-#include <sstream>      // дл€ std::istringstream
+#include <string>       // for std::getline
+#include <sstream>      // for std::istringstream
 
-#define MEM_STEP 16     //шаг: сколько выдел€етс€ €чеек пам€ти минимум при выделении пам€ти
+#define MEM_STEP 16     //step: how much cells memory to highlight in happening size=0
 
 template <class T>
 class MemData {
@@ -36,14 +36,14 @@ public:
 	T& at(size_t index);
 	const T& at(size_t index) const;
 
-	void allocateRaw(size_t capacity); // перевыделение пам€ти без сохранени€ данных (возможно уменьшение capasity)
-	void clear() noexcept; // освобождение пам€ти
-	void realloc(size_t capacity, size_t start, size_t size); // перевыделение пам€ти с сохранением данных в диапазоне [start, start + size)
-	void shiftRight(size_t start, size_t count);  // сдвиг элементов вправо
-	void shiftLeft(size_t start, size_t count);   // сдвиг элементов влево
+	void allocateRaw(size_t capacity); // without save memory (happen less capasity)
+	void clear() noexcept; // clear memory
+	void realloc(size_t capacity, size_t start, size_t size); // with save memory [start, start + size)
+	void shiftRight(size_t start, size_t count);
+	void shiftLeft(size_t start, size_t count);
 	void reallocWithShiftRight(size_t newCapacity, size_t start, size_t count);
 
-	size_t calculateCapacity_(size_t capacity); // вычисление нового размера пам€ти с учетом MEM_STEP
+	size_t calculateCapacity_(size_t capacity); // new capacity with MEM_STEP
 
 	MemData<T>& operator=(const MemData<T>&) = delete;
 	MemData<T>& operator=(MemData<T>&&) noexcept;
@@ -186,11 +186,11 @@ void MemData<T>::reallocWithShiftRight(size_t newCapacity, size_t start, size_t 
 	}
 
 	size_t i = 0;
-	//  опируем до start
+	// Copy to start
 	for (; i < start; ++i) {
 		newData[i] = std::move(data_[i]);
 	}
-	//  опируем со сдвигом на 1 элемент вправо, чтобы освободить место дл€ вставки
+	// Copy with shift to 1 element in right,that free memory for insert
 	for (; i < start + count; ++i) {
 		newData[i + 1] = std::move(data_[i]);
 	}
